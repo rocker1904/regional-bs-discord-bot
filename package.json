@@ -1,0 +1,41 @@
+{
+  "name": "regional-bs-discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Bot.ts",
+  "scripts": {
+    "build": "rimraf ./build && tsc",
+    "start": "npm run build && node -r dotenv/config build/Bot.js",
+    "start:dev": "nodemon",
+    "lint": "eslint . --ext .ts",
+    "deploy-commands": "npm run build && node -r dotenv/config build/DeployCommands.js"
+  },
+  "author": "Rocker1904",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^17.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.10.0",
+    "@typescript-eslint/parser": "^5.10.0",
+    "eslint": "^8.7.0",
+    "eslint-config-google": "^0.14.0",
+    "nodemon": "^2.0.15",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@discordjs/builders": "^0.11.0",
+    "@discordjs/rest": "^0.2.0-canary.0",
+    "axios": "^0.24.0",
+    "bufferutil": "^4.0.6",
+    "discord-api-types": "^0.26.1",
+    "discord.js": "^13.6.0",
+    "dotenv": "^14.1.1",
+    "erlpack": "github:discord/erlpack",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.41",
+    "utf-8-validate": "^5.0.8",
+    "winston": "^3.4.0",
+    "zlib-sync": "^0.1.7"
+  }
+}
