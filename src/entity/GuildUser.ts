@@ -2,7 +2,7 @@
 import {BaseEntity, Column, Entity, PrimaryColumn} from 'typeorm';
 
 @Entity()
-export class User extends BaseEntity {
+export class GuildUser extends BaseEntity {
     @PrimaryColumn()
     public discordID!: string;
 

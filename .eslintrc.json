@@ -22,6 +22,7 @@
         "indent": ["error", 4],
         "max-len": "off",
         "semi": "off",
-        "@typescript-eslint/semi": ["error"]
+        "@typescript-eslint/semi": ["error"],
+        "@typescript-eslint/no-non-null-assertion": "Off"
     }
 }
