@@ -1,8 +1,23 @@
+import AddUserCommand from './AddUserCommand';
+import AmCommand from './AmCommand';
+import AmrCommand from './AmrCommand';
 import Command from './Command';
-
+import GetCommand from './GetCommand';
+import PingCommand from './PingCommand';
+import RegisterCommand from './RegisterCommand';
+import RemoveUserCommand from './RemoveUserCommand';
+import UnregisterCommand from './UnregisterCommand';
 
 class Commands {
     static commands: Command[] = [
+        new AddUserCommand(),
+        new AmCommand(),
+        new AmrCommand(),
+        new GetCommand(),
+        new PingCommand(),
+        new RegisterCommand(),
+        new RemoveUserCommand(),
+        new UnregisterCommand(),
     ];
 }
 
