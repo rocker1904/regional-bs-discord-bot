@@ -1,4 +1,5 @@
 import Bot from '../Bot';
+import RoleUpdater from '../RoleUpdater';
 import logger from '../util/logger';
 import updatePermissions from '../util/updatePermissions';
 
@@ -25,4 +26,5 @@ export default async function onReady(): Promise<void> {
     logger.info(`Ready! Member Count: ${Bot.guild.members.cache.size}.`);
 
     await updatePermissions(); // Can't be run before the guild has been fetched
+    Bot.updater = new RoleUpdater();
 }

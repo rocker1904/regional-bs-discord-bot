@@ -5,12 +5,14 @@ import deployCommands from './util/deployCommands';
 import logger from './util/logger';
 import onReady from './listeners/onReady';
 import onInteraction from './listeners/onInteraction';
+import RoleUpdater from './RoleUpdater';
 
 export default class Bot {
     public static client: Client;
     public static guild: Guild;
     public static logChannel: TextChannel;
     public static dbConnection: Connection;
+    public static updater: RoleUpdater;
 }
 
 async function main() {

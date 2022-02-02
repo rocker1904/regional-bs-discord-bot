@@ -17,4 +17,16 @@ export default class ScoresaberAPI {
         const player = response.data as Player;
         return player;
     }
+
+    public static async getPlayersUnderRank(rank: number, region?: string): Promise<Player[]> {
+        let players: Player[] = [];
+        const totalPages = Math.ceil(rank / 50);
+        for (let i = 0; i < totalPages; i++) {
+            let request = `https://scoresaber.com/api/players?page=${i + 1}`;
+            if (region) request += `&countries=${region}`;
+            const response = await Axios.get(request); // TODO: Handle request fail
+            players = players.concat(response.data as Player[]);
+        }
+        return players;
+    }
 }
