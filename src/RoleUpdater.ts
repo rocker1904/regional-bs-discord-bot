@@ -17,9 +17,7 @@ export default class RoleUpdater {
 
     public start() {
         if (this.stopped) {
-            this.timer = setInterval(() => {
-                void this.main();
-            }, interval);
+            this.timer = setInterval(() => void this.main(), interval);
             this.stopped = false;
             logger.info('Role updater started');
         }
