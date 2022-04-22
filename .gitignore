@@ -108,6 +108,3 @@ dist
 
 # Output files
 build
-
-# Config file with sensitive token info
-src/config.json
