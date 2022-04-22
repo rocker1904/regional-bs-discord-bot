@@ -6,7 +6,6 @@ import {GuildUser} from '../entity/GuildUser';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import Strings from '../util/Strings';
 import Command from './Command';
-import {staffRoleID} from '../config.json';
 
 export default class GetCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -32,7 +31,7 @@ export default class GetCommand implements Command {
         );
 
     public permissions = [{
-        id: staffRoleID,
+        id: process.env.STAFF_ID!,
         type: PermissionTypes.ROLE,
         permission: true,
     }];

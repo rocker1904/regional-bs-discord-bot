@@ -32,6 +32,7 @@
     "discord.js": "^13.6.0",
     "dotenv": "^14.1.1",
     "erlpack": "github:discord/erlpack",
+    "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.41",
     "utf-8-validate": "^5.0.8",

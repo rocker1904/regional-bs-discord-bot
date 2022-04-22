@@ -33,9 +33,9 @@ export default class AmCommand implements Command {
         const playerAbove = await ScoresaberAPI.getPlayerByRank(player.rank - 1);
 
         const reply = `__**Global ranks around you:**__
-        #${playerAbove.rank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.
-        #${player.rank} **You (${player.name})** have ${player.pp}PP.
-        #${playerBelow.rank} **${playerBelow.name}** has ${(player.pp - playerBelow.pp).toFixed(2)} less PP than you.`;
+#${playerAbove.rank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.
+#${player.rank} **You (${player.name})** have ${player.pp}PP.
+#${playerBelow.rank} **${playerBelow.name}** has ${(player.pp - playerBelow.pp).toFixed(2)} less PP than you.`;
 
         await interaction.reply(reply);
     }

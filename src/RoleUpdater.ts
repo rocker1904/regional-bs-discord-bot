@@ -17,9 +17,10 @@ export default class RoleUpdater {
 
     public start() {
         if (this.stopped) {
-            this.timer = setInterval(() => void this.main(), interval);
+            this.timer = setInterval(() => void this.main(), interval * 1000 * 60);
             this.stopped = false;
             logger.info('Role updater started');
+            void this.main();
         }
     }
 
@@ -36,7 +37,7 @@ export default class RoleUpdater {
         const finalregionRankGroup = regionRankGroups.at(-1);
         if (!finalregionRankGroup) return;
         const regionalPlayers = await ScoresaberAPI.getPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
-        await this.updateRankRoles(regionalPlayers, regionRankGroups);
+        await this.updateRankRoles(regionalPlayers, regionRankGroups, true);
 
         // Update global ranks
         const finalGlobalRankGroup = globalRankGroups.at(-1);
@@ -45,19 +46,20 @@ export default class RoleUpdater {
         await this.updateRankRoles(globalPlayers, globalRankGroups);
     }
 
-    private async updateRankRoles(players: Player[], rankGroups: RankGroup[]): Promise<void> {
+    private async updateRankRoles(players: Player[], rankGroups: RankGroup[], regional = false): Promise<void> {
         for (const player of players) {
             // Request the discord id of the individual with this Scoresaber profile from the database
             const guildUser = await GuildUser.findOne({scoreSaberID: player.id});
             if (!guildUser) continue;
 
-            // Get their guildMemeber object
+            // Get their guildMember object
             const guildMember = await Bot.guild.members.fetch(guildUser.discordID);
+            const playerRank = regional ? player.countryRank : player.rank;
 
             // Work out which rank group they fall under
             let playerRankGroup: RankGroup | undefined;
             for (const rankGroup of rankGroups) {
-                if (rankGroup.rank > player.rank) {
+                if (rankGroup.rank > playerRank) {
                     playerRankGroup = rankGroup;
                     break;
                 }
@@ -82,7 +84,7 @@ export default class RoleUpdater {
             }
 
             // If no player rank group, no need to add a role
-            if (playerRankGroup === undefined) continue;
+            if (!playerRankGroup) continue;
 
             // Add their current rank role if they don't already have it
             if (!guildMember.roles.cache.some((role) => role.id === playerRankGroup!.roleID)) {
