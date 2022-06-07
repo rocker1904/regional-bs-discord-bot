@@ -5,6 +5,7 @@ import Command from './Command';
 import GetCommand from './GetCommand';
 import GibPPCommand from './GibPPCommand';
 import PingCommand from './PingCommand';
+import PlayerChangeCommand from './PlayerChangeCommand';
 import PPDiffCommand from './PPDiffCommand';
 import RegisterCommand from './RegisterCommand';
 import RemoveUserCommand from './RemoveUserCommand';
@@ -18,6 +19,7 @@ class Commands {
         new GetCommand(),
         new GibPPCommand(),
         new PingCommand(),
+        new PlayerChangeCommand(),
         new PPDiffCommand(),
         new RegisterCommand(),
         new RemoveUserCommand(),
