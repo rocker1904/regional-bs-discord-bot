@@ -4,10 +4,7 @@ import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
-import extractScoreSaberID from '../util/extractScoreSaberID';
-import { Player } from '../api/scoresaber/types/PlayerData';
 import { GainsCommandData } from '../entity/GainsCommandData';
-import { IsNull } from 'typeorm';
 
 export default class PlayerChangeCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -35,24 +32,28 @@ export default class PlayerChangeCommand implements Command {
             await newGainsData.save();
             guildUser.gainsData = newGainsData;
             await guildUser.save();
-            await interaction.reply("No Prior Gains Data found.");
+            return;
         } else {
         
             // Get the change
             const globalRankChange = Math.abs(player.rank - gainsData.globalRank);
             const ppChange = Math.abs(player.pp - gainsData.pp);
 
-            var reply = "You ";
+            var reply = "";
             if(player.pp > gainsData.pp) {
-                reply += `**gained ${ppChange.toFixed(2)}** in the last ${await this.DiffDate(gainsData.time)} days `;
+                reply += `You **gained ${ppChange.toFixed(2)}PP** in the last ${await this.DiffDate(gainsData.time)}`;
+            } else if(gainsData.pp > player.pp) {
+                reply += `You **lost ${ppChange.toFixed(2)}PP** in the last ${await this.DiffDate(gainsData.time)}`;
             } else {
-                reply += `**lost ${ppChange.toFixed(2)}** in the last ${await this.DiffDate(gainsData.time)} days `;
+                reply += `Your PP has **stayed the same** in the last ${await this.DiffDate(gainsData.time)}`;
             }
 
             if(player.rank > gainsData.globalRank){
-                reply += `(and **lost ${globalRankChange}** ranks)`;
+                reply += ` (and **lost ${globalRankChange}** ranks)`;
+            } else if(player.rank < gainsData.globalRank) {
+                reply += ` (and **gained ${globalRankChange}** ranks)`;
             } else {
-                reply += `(and **gained ${globalRankChange}** ranks)`;
+                reply += ` (and **stayed the same** rank)`;
             }
 
             await interaction.reply(reply);
@@ -65,9 +66,10 @@ export default class PlayerChangeCommand implements Command {
         }
     }
 
-    public async DiffDate(date: Date): Promise<Number> {
+    // Helper function for calculating date difference
+    public async DiffDate(date: Date): Promise<string> {
         var diff = Math.abs(new Date().getTime() - date.getTime());
         var days = Math.ceil(diff / (1000 * 3600 * 24));
-        return days;
+        if(days > 1) { return days + " days"; } else { return "day"; }
     }
 }

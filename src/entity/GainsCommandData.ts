@@ -14,7 +14,7 @@ export class GainsCommandData extends BaseEntity {
     @Column()
     public time!: Date;
 
-    @Column()
+    @Column({type: "float"})
     public pp!: number;
 
     @OneToOne(() => GuildUser, guildUser => guildUser.gainsData)
