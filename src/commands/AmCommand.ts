@@ -10,8 +10,6 @@ export default class AmCommand implements Command {
         .setName('am')
         .setDescription('Returns the pp diff between you and the people around you.');
 
-    public permissions = [];
-
     public async execute(interaction: CommandInteraction) {
         // Fetch user from db
         const guildUser = await GuildUser.findOne(interaction.user.id);

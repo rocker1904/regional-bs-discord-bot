@@ -11,8 +11,6 @@ export default class AmrCommand implements Command {
         .setName('amr')
         .setDescription('Returns the pp diff between you and the people around you in your region.');
 
-    public permissions = [];
-
     public async execute(interaction: CommandInteraction) {
         // Fetch user from db
         const guildUser = await GuildUser.findOne(interaction.user.id);

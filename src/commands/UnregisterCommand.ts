@@ -9,8 +9,6 @@ export default class UnregisterCommand implements Command {
         .setName('unregister')
         .setDescription('Unregister from the bot');
 
-    public permissions = [];
-
     public async execute(interaction: CommandInteraction) {
         const user = interaction.user;
 

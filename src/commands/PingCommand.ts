@@ -7,8 +7,6 @@ export default class PingCommand implements Command {
         .setName('ping')
         .setDescription('Replies with Pong!');
 
-    public permissions = [];
-
     public async execute(interaction: CommandInteraction) {
         await interaction.reply('Pong!');
     }

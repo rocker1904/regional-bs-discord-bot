@@ -1,6 +1,5 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
 import {CommandInteraction} from 'discord.js';
-import {ApplicationCommandPermissionTypes as PermissionTypes} from 'discord.js/typings/enums';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -15,12 +14,6 @@ export default class RemoveUserCommand implements Command {
                 .setDescription('User to remove')
                 .setRequired(true),
         );
-
-    public permissions = [{
-        id: process.env.STAFF_ID!,
-        type: PermissionTypes.ROLE,
-        permission: true,
-    }];
 
     public async execute(interaction: CommandInteraction) {
         const user = interaction.options.getUser('user')!; // Required options so should be safe to assert not null

@@ -15,8 +15,6 @@ export default class RegisterCommand implements Command {
                 .setRequired(true),
         );
 
-    public permissions = [];
-
     public async execute(interaction: CommandInteraction) {
         const user = interaction.user;
         const scoreSaber = interaction.options.getString('scoresaber')!; // Required option so should be safe to assert not null

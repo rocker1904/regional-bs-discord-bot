@@ -1,6 +1,5 @@
 import {SlashCommandBuilder} from '@discordjs/builders';
 import {CommandInteraction} from 'discord.js';
-import {ApplicationCommandPermissionTypes as PermissionTypes} from 'discord.js/typings/enums';
 import Bot from '../Bot';
 import {GuildUser} from '../entity/GuildUser';
 import extractScoreSaberID from '../util/extractScoreSaberID';
@@ -29,12 +28,6 @@ export default class GetCommand implements Command {
                         .setRequired(true),
                 ),
         );
-
-    public permissions = [{
-        id: process.env.STAFF_ID!,
-        type: PermissionTypes.ROLE,
-        permission: true,
-    }];
 
     public async execute(interaction: CommandInteraction) {
         if (interaction.options.getSubcommand() === 'user') {
