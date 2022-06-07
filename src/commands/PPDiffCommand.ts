@@ -5,44 +5,83 @@ import Strings from '../util/Strings';
 import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
 import extractScoreSaberID from '../util/extractScoreSaberID';
+import { Player } from '../api/scoresaber/types/PlayerData';
 
 export default class PPDiffCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
         .setName('pp-diff')
         .setDescription('Returns the difference in PP between you and a given player.')
-        .addUserOption((option) =>
-            option.setName('player')
-                .setDescription('Player to compare difference in PP.')
-                .setRequired(true),
-        )
+        .addSubcommand((subcommand) =>
+            subcommand.setName('user')
+                .setDescription('Get PP difference given a Discord User.')
+                .addUserOption((option) =>
+                    option.setName('player')
+                    .setDescription('Discord User to compare PP with.')
+                    .setRequired(true),
+                ),
+        ).addSubcommand((subcommand) =>
+            subcommand.setName('scoresaber')
+                .setDescription('Get PP difference given a Scoresaber ID.')
+                .addStringOption((option) =>
+                    option.setName('scoresaber')
+                        .setDescription('Scoresaber Profile to compare PP with.')
+                        .setRequired(true),
+                ),
+        );
         
     public async execute(interaction: CommandInteraction) {
 
         // Fetch user from db
         const guildUser = await GuildUser.findOne(interaction.user.id);
-        const targetUser = await GuildUser.findOne(interaction.options.getUser('player')?.id)
-
-        if (!guildUser || !targetUser) {
+        if (!guildUser) {
             await interaction.reply(Strings.NO_USER);
             return;
         }
 
-        // Get data for user profile and given profile
+        // Get the user's Scoresaber
         const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
-        const targetPlayer = await ScoresaberAPI.getPlayerByID(targetUser.scoreSaberID);
-        var reply = "";
 
-        const PPDiff = Math.abs(targetPlayer.pp - player.pp).toFixed(2);
+        // Depending on sub command, Get target player's Scoresaber and Return difference
+        if(interaction.options.getSubcommand() === 'scoresaber'){
+            const scoresaber = interaction.options.getString('scoresaber')!;
 
-        // If user is higher then given player.
-        if(targetPlayer.pp > player.pp) {
-            reply += `${targetPlayer.name} has  ${PPDiff} more PP than you.`;
-        } else if(player.pp > targetPlayer.pp) {
-            reply += `You have ${PPDiff} more PP than ${targetPlayer.name}.`;
+            // Test if given an invalid ScoreSaber ID
+            const scoresaberID = extractScoreSaberID(scoresaber);
+            if (scoresaberID === null) {
+                await interaction.reply(Strings.INVALID_PROFILE);
+                return;
+            }
+
+            // Get target's Scoresaber and PP Difference
+            const targetPlayer = await ScoresaberAPI.getPlayerByID(scoresaberID);
+            const PPDiff = Math.abs(targetPlayer.pp - player.pp);
+
+            await interaction.reply(await this.DiffReply(PPDiff, player, targetPlayer));
+
         } else {
-            reply += `You have the same PP as ${targetPlayer.name}.`;
-        }
+            const targetUser = await GuildUser.findOne(interaction.options.getUser('player')?.id);
 
-        await interaction.reply(reply);
+            // Test if TargetUser is null
+            if (!targetUser) {
+                await interaction.reply(Strings.NO_USER);
+                return;
+            }
+            
+            // Get target's Scoresaber and PP Difference
+            const targetPlayer = await ScoresaberAPI.getPlayerByID(targetUser.scoreSaberID);
+            const PPDiff = Math.abs(targetPlayer.pp - player.pp);
+
+            await interaction.reply(await this.DiffReply(PPDiff, player, targetPlayer));
+        }
+    }
+
+    public async DiffReply(diff: number, user: Player, target: Player): Promise<string> {
+        if(target.pp > user.pp) {
+            return `${target.name} has ${diff.toFixed(2)} more PP than you.`;
+        } else if(user.pp > target.pp) {
+            return `You have ${diff.toFixed(2)} more PP than ${target.name}.`;
+        } else {
+            return `You have the same PP as ${target.name}.`;
+        }
     }
 }
