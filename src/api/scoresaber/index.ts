@@ -2,6 +2,7 @@ import Axios, {AxiosResponse} from 'axios';
 import {Player, PlayerCollection} from './types/PlayerData';
 
 export default class ScoresaberAPI {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private static async waitForRateLimit(resp: AxiosResponse<any, any>) {
         if (resp.headers['x-ratelimit-remaining'] === '1') {
             const expiresInMillis = parseInt(resp.headers['x-ratelimit-reset']) * 1000 - new Date().getTime() + 1000;
