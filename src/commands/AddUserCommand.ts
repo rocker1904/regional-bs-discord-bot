@@ -4,6 +4,7 @@ import {GuildUser} from '../entity/GuildUser';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import Command from './Command';
 import Strings from '../util/Strings';
+import { GainsCommandData } from '../entity/GainsCommandData';
 
 export default class AddUserCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
