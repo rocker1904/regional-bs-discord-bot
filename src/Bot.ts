@@ -1,4 +1,4 @@
-import {ConnectionOptionsReader, DataSource} from 'typeorm';
+import {ConnectionOptionsReader, DataSource, DataSourceOptions} from 'typeorm';
 import 'reflect-metadata';
 import {Client, Guild, IntentsBitField, TextChannel} from 'discord.js';
 import deployCommands from './util/deployCommands';
@@ -6,6 +6,10 @@ import logger from './util/logger';
 import onReady from './listeners/onReady';
 import onInteraction from './listeners/onInteraction';
 import RoleUpdater from './RoleUpdater';
+
+type Mutable<Type> = {
+    -readonly [Key in keyof Type]: Type[Key];
+};
 
 export default class Bot {
     public static client: Client;
@@ -17,12 +21,16 @@ export default class Bot {
 
 async function main() {
     logger.info('Connecting to database...');
-    const dataSourceOptions = await new ConnectionOptionsReader().all();
-    if (dataSourceOptions.length === 0) {
+    const allDataSourceOptions = await new ConnectionOptionsReader().all();
+    if (allDataSourceOptions.length === 0) {
         logger.error('Could not find database settings.');
         process.exit();
     }
-    Bot.dataSource = new DataSource(dataSourceOptions[0]);
+    const dataSourceOptions = allDataSourceOptions[0] as Mutable<DataSourceOptions>;
+    if (process.env.NODE_ENV === 'production') {
+        dataSourceOptions.extra = {socketPath: '/run/mysqld/mysqld.sock'};
+    }
+    Bot.dataSource = new DataSource(dataSourceOptions);
     Bot.dataSource.initialize().catch((error) => {
         logger.error('Failed to connect to database');
         logger.error(error);
