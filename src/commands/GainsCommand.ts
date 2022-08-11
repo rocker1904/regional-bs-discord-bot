@@ -5,15 +5,16 @@ import Strings from '../util/Strings';
 import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
 import {GainsCommandData} from '../entity/GainsCommandData';
+import logger from '../util/logger';
 
-export default class PlayerChangeCommand implements Command {
+export default class GainsCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
         .setName('gains')
         .setDescription('Returns the PP and Rank change since last using the command.');
 
     public async execute(interaction: CommandInteraction) {
         // Fetch user from db
-        const guildUser = await GuildUser.findOne(interaction.user.id);
+        const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}, relations: ['gainsData']});
         if (!guildUser) {
             await interaction.reply(Strings.NO_USER);
             return;
