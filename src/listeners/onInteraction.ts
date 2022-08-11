@@ -1,8 +1,8 @@
-import {Interaction} from 'discord.js';
+import {Interaction, InteractionType} from 'discord.js';
 import commands from '../commands';
 
 export default async function onInteraction(interaction: Interaction): Promise<void> {
-    if (!interaction.isCommand()) return;
+    if (interaction.type !== InteractionType.ApplicationCommand) return;
 
     const {commandName} = interaction;
     const command = commands.find((c) => c.slashCommandBuilder.name == commandName);

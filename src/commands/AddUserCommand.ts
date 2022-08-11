@@ -1,5 +1,4 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {CommandInteraction} from 'discord.js';
+import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import Command from './Command';
@@ -9,7 +8,7 @@ export default class AddUserCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
         .setName('add-user')
         .setDescription('Adds a user to the database.')
-        .setDefaultPermission(false)
+        .setDefaultMemberPermissions(0)
         .addUserOption((option) =>
             option.setName('user')
                 .setDescription('User to add')
@@ -22,6 +21,7 @@ export default class AddUserCommand implements Command {
         );
 
     public async execute(interaction: CommandInteraction) {
+        if (!interaction.isChatInputCommand()) return;
         const user = interaction.options.getUser('user')!; // Required options so should be safe to assert not null
         const scoreSaber = interaction.options.getString('scoresaber')!;
 
@@ -33,13 +33,13 @@ export default class AddUserCommand implements Command {
         }
 
         // Test if the user is already in the database
-        if (await GuildUser.findOne(user.id)) {
+        if (await GuildUser.findOne({where: {discordID: user.id}})) {
             await interaction.reply(Strings.USER_ALREADY_REGISTERED);
             return;
         }
 
         // Test if the ScoreSaber profile is already in the database
-        if (await GuildUser.findOne({scoreSaberID})) {
+        if (await GuildUser.findOne({where: {scoreSaberID: scoreSaberID}})) {
             await interaction.reply(Strings.PROFILE_ALREADY_REGISTERED);
             return;
         }

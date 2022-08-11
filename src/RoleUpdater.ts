@@ -49,7 +49,7 @@ export default class RoleUpdater {
     private async updateRankRoles(players: Player[], rankGroups: RankGroup[], regional = false): Promise<void> {
         for (const player of players) {
             // Request the discord id of the individual with this Scoresaber profile from the database
-            const guildUser = await GuildUser.findOne({scoreSaberID: player.id});
+            const guildUser = await GuildUser.findOne({where: {scoreSaberID: player.id}});
             if (!guildUser) continue;
 
             // Get their guildMember object

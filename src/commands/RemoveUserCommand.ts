@@ -1,5 +1,4 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {CommandInteraction} from 'discord.js';
+import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -8,7 +7,7 @@ export default class RemoveUserCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
         .setName('remove-user')
         .setDescription('Removes a user from the database.')
-        .setDefaultPermission(false)
+        .setDefaultMemberPermissions(0)
         .addUserOption((option) =>
             option.setName('user')
                 .setDescription('User to remove')
@@ -18,7 +17,7 @@ export default class RemoveUserCommand implements Command {
     public async execute(interaction: CommandInteraction) {
         const user = interaction.options.getUser('user')!; // Required options so should be safe to assert not null
 
-        const guildUser = await GuildUser.findOne(user.id);
+        const guildUser = await GuildUser.findOne({where: {discordID: user.id}});
         if (!guildUser) {
             await interaction.reply(Strings.NO_USER);
             return;

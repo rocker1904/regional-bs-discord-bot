@@ -1,5 +1,4 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {CommandInteraction} from 'discord.js';
+import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -13,7 +12,7 @@ export default class UnregisterCommand implements Command {
         const user = interaction.user;
 
         // Test if the user is already in the database
-        const guildUser = await GuildUser.findOne(user.id);
+        const guildUser = await GuildUser.findOne({where: {discordID: user.id}});
         if (guildUser) {
             await guildUser.remove();
             await interaction.reply(Strings.USER_REMOVAL_SUCCESS);

@@ -1,6 +1,6 @@
-import {Connection, createConnection} from 'typeorm';
+import {ConnectionOptionsReader, DataSource} from 'typeorm';
 import 'reflect-metadata';
-import {Client, Guild, Intents, TextChannel} from 'discord.js';
+import {Client, Guild, IntentsBitField, TextChannel} from 'discord.js';
 import deployCommands from './util/deployCommands';
 import logger from './util/logger';
 import onReady from './listeners/onReady';
@@ -11,25 +11,31 @@ export default class Bot {
     public static client: Client;
     public static guild: Guild;
     public static logChannel: TextChannel;
-    public static dbConnection: Connection;
+    public static dataSource: DataSource;
     public static updater: RoleUpdater;
 }
 
 async function main() {
     logger.info('Connecting to database...');
-    Bot.dbConnection = await createConnection().catch((error) => {
+    const dataSourceOptions = await new ConnectionOptionsReader().all();
+    if (dataSourceOptions.length === 0) {
+        logger.error('Could not find database settings.');
+        process.exit();
+    }
+    Bot.dataSource = new DataSource(dataSourceOptions[0]);
+    Bot.dataSource.initialize().catch((error) => {
         logger.error('Failed to connect to database');
         logger.error(error);
         process.exit();
     });
     logger.info('Connected to database.');
 
-    const intents = new Intents();
+    const intents = new IntentsBitField();
     intents.add(
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_MEMBERS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        IntentsBitField.Flags.Guilds,
+        IntentsBitField.Flags.GuildMembers,
+        IntentsBitField.Flags.GuildMessages,
+        IntentsBitField.Flags.GuildMessageReactions,
     );
 
     Bot.client = new Client({intents});

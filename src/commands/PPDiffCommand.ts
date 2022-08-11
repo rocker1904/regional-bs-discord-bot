@@ -1,5 +1,4 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {CommandInteraction} from 'discord.js';
+import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -30,8 +29,9 @@ export default class PPDiffCommand implements Command {
         );
 
     public async execute(interaction: CommandInteraction) {
+        if (!interaction.isChatInputCommand()) return;
         // Fetch user from db
-        const guildUser = await GuildUser.findOne(interaction.user.id);
+        const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}});
         if (!guildUser) {
             await interaction.reply(Strings.NO_USER);
             return;
@@ -57,7 +57,7 @@ export default class PPDiffCommand implements Command {
 
             await interaction.reply(this.diffString(PPDiff, player, targetPlayer));
         } else {
-            const targetUser = await GuildUser.findOne(interaction.options.getUser('player')?.id);
+            const targetUser = await GuildUser.findOne({where: {discordID: interaction.options.getUser('player')?.id}});
 
             // Test if TargetUser is null
             if (!targetUser) {

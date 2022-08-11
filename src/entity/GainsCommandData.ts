@@ -17,5 +17,5 @@ export class GainsCommandData extends BaseEntity {
     public pp!: number;
 
     @OneToOne(() => GuildUser, (guildUser) => guildUser.gainsData)
-        guildUser!: GuildUser;
+        guildUser!: GuildUser | undefined;
 }

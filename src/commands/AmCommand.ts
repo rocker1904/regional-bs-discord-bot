@@ -1,5 +1,4 @@
-import {SlashCommandBuilder} from '@discordjs/builders';
-import {CommandInteraction} from 'discord.js';
+import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -12,7 +11,7 @@ export default class AmCommand implements Command {
 
     public async execute(interaction: CommandInteraction) {
         // Fetch user from db
-        const guildUser = await GuildUser.findOne(interaction.user.id);
+        const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}});
 
         if (!guildUser) {
             await interaction.reply(Strings.NO_USER);
