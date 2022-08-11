@@ -5,7 +5,6 @@ import Strings from '../util/Strings';
 import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
 import {GainsCommandData} from '../entity/GainsCommandData';
-import logger from '../util/logger';
 
 export default class GainsCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
