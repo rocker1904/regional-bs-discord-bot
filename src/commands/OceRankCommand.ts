@@ -12,6 +12,9 @@ export default class OceRankCommand implements Command {
         .setDescription('Returns the pp diff between you and the people around you on the oce leaderboard.');
 
     public async execute(interaction: CommandInteraction) {
+        // May take time to get players so defer the reply
+        await interaction.deferReply();
+
         // Fetch user from db
         const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}});
 

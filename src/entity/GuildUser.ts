@@ -13,7 +13,4 @@ export class GuildUser extends BaseEntity {
     @OneToOne(() => GainsCommandData, (gainsData) => gainsData.guildUser)
     @JoinColumn()
     public gainsData!: GainsCommandData;
-
-    @Column('boolean', {default: false})
-    public hasLeftServer = false;
 }

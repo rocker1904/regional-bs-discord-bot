@@ -6,6 +6,7 @@ import logger from './util/logger';
 import onReady from './listeners/onReady';
 import onInteraction from './listeners/onInteraction';
 import RoleUpdater from './RoleUpdater';
+import onGuildMemberAdd from './listeners/onGuildMemberAdd';
 
 type Mutable<Type> = {
     -readonly [Key in keyof Type]: Type[Key];
@@ -13,8 +14,9 @@ type Mutable<Type> = {
 
 export default class Bot {
     public static client: Client;
-    public static guild: Guild;
-    public static logChannel: TextChannel;
+    public static guilds: {[key: string]: Guild} = {}; // Guild ID -> Guild
+    public static logChannels: {[key: string]: TextChannel} = {}; // Guild ID -> log channel
+    public static staffIDs: {[key: string]: string} = {}; // Guild ID -> staff ID
     public static dataSource: DataSource;
     public static updater: RoleUpdater;
 }
@@ -47,14 +49,16 @@ async function main() {
     );
 
     Bot.client = new Client({intents});
-    Bot.client.once('ready', onReady);
+    Bot.client.on('guildMemberAdd', onGuildMemberAdd);
     Bot.client.on('interactionCreate', onInteraction);
+    Bot.client.once('ready', onReady);
 
     await deployCommands();
     await Bot.client.login(process.env.BOT_TOKEN); // Login errors not caught, we want to crash if we can't log in
 
     // Prevent the bot from crashing on uncaught errors
     process.on('unhandledRejection', (error) => logger.error('Uncaught Promise Rejection:', error));
+    process.on('uncaughtException', (error) => logger.error('Unhandled Exception:', error));
 }
 
 void main();

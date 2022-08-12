@@ -1,7 +1,7 @@
 import ScoresaberAPI from './api/scoresaber';
 import {Player} from './api/scoresaber/types/PlayerData';
 import Bot from './Bot';
-import {regionRankGroups, globalRankGroups, scoresaberRegion, interval, roleMap} from './config.json';
+import {rankUpdateInterval, guildConfigs} from './config.json';
 import {GuildUser} from './entity/GuildUser';
 import logger from './util/logger';
 
@@ -12,14 +12,18 @@ export default class RoleUpdater {
     private stopped = true;
 
     constructor() {
-        regionRankGroups.sort((a, b) => a.rank - b.rank);
-        globalRankGroups.sort((a, b) => a.rank - b.rank);
+        // Make sure rank groups are sorted ascending
+        for (const guildConfig of guildConfigs) {
+            const {regionRankGroups, globalRankGroups} = guildConfig;
+            regionRankGroups.sort((a, b) => a.rank - b.rank);
+            globalRankGroups.sort((a, b) => a.rank - b.rank);
+        }
         this.start();
     }
 
     public start() {
         if (this.stopped) {
-            this.timer = setInterval(() => void this.main(), interval * 1000 * 60);
+            this.timer = setInterval(() => void this.main(), rankUpdateInterval * 1000 * 60);
             this.stopped = false;
             logger.info('Role updater started');
             void this.main();
@@ -34,50 +38,45 @@ export default class RoleUpdater {
         }
     }
 
-    private async main() {
-        // Update region ranks
-        const finalregionRankGroup = regionRankGroups.at(-1);
-        if (!finalregionRankGroup) return;
-        const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
-        await this.updateRankRoles(regionalPlayers, regionRankGroups, true);
+    public async main() {
+        logger.debug('Running role update');
+        for (const guildConfig of guildConfigs) {
+            const {regionRankGroups, globalRankGroups, scoresaberRegion, guildID} = guildConfig;
 
-        // Update global ranks
-        const finalGlobalRankGroup = globalRankGroups.at(-1);
-        if (!finalGlobalRankGroup) return;
-        const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank);
-        await this.updateRankRoles(globalPlayers, globalRankGroups);
+            // Update region ranks
+            const finalregionRankGroup = regionRankGroups.at(-1);
+            if (finalregionRankGroup) {
+                const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
+                await this.updateRankRoles(regionalPlayers, regionRankGroups, guildID, true);
+            }
+
+            // Update global ranks
+            const finalGlobalRankGroup = globalRankGroups.at(-1);
+            if (finalGlobalRankGroup) {
+                const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank);
+                await this.updateRankRoles(globalPlayers, globalRankGroups, guildID);
+            }
+        }
+        logger.debug('Role update complete');
     }
 
-    private async updateRankRoles(players: Player[], rankGroups: RankGroup[], regional = false): Promise<void> {
+    public async updateRankRoles(players: Player[], rankGroups: RankGroup[], guildID: string, regional = false): Promise<void> {
         for (const player of players) {
-            await RoleUpdater.updateRankRole(player, rankGroups, regional);
+            await RoleUpdater.updateRankRole(player, rankGroups, guildID, regional);
         }
     }
 
-    public static async updateRankRole(player: Player, rankGroups: RankGroup[], regional = false): Promise<void> {
-        // Request the Discord ID of the individual with this ScoreSaber profile from the database
+    public static async updateRankRole(player: Player, rankGroups: RankGroup[], guildID: string, regional = false): Promise<void> {
+        // Get the Discord ID of the player with this ScoreSaber profile from the database
         const guildUser = await GuildUser.findOne({where: {scoreSaberID: player.id}});
         if (!guildUser) return;
 
         // Fetch their GuildMember object
-        const guildMember = await Bot.guild.members.fetch(guildUser.discordID).catch(() => {
+        const guildMember = await Bot.guilds[guildID].members.fetch(guildUser.discordID).catch(() => {
             // If member can't be found, we can ignore the error here, it's handled below
         });
 
-        if (!guildMember) {
-            if (!guildUser.hasLeftServer) { // If this is the first time we've noticed they're missing, send a message
-                logger.notice(`Someone left the server`);
-                logger.notice(`Discord ID: ${guildUser.discordID}\nScoreSaber ID: ${guildUser.scoreSaberID}`);
-                guildUser.hasLeftServer = true;
-                await guildUser.save();
-            }
-            return;
-        }
-
-        if (guildUser.hasLeftServer && guildMember) {
-            guildUser.hasLeftServer = false;
-            await guildUser.save();
-        }
+        if (!guildMember) return;
         const playerRank = regional ? player.countryRank : player.rank;
 
         // Work out which rank group they fall under
@@ -94,13 +93,13 @@ export default class RoleUpdater {
         // Remove rank roles the player shouldn't have
         for (const rankGroup of rankGroups) {
             if (guildMember.roles.cache.some((role) => role.id === rankGroup.roleID) && rankGroup !== playerRankGroup) {
-                const removedRole = Bot.guild.roles.resolve(rankGroup.roleID);
+                const removedRole = Bot.guilds[guildID].roles.resolve(rankGroup.roleID);
                 if (!removedRole) {
-                    logger.error(`Can't find rank role for ${rankGroup.roleID} with rank ${rankGroup.rank}`);
+                    logger.error(`Can't find rank role for ${rankGroup.roleID} with rank ${rankGroup.rank}`, {guildID});
                     continue;
                 }
                 await guildMember.roles.remove(removedRole).catch((err) => {
-                    logger.error('Error while removing roles');
+                    logger.error('Error while removing roles', {guildID});
                     logger.error(err);
                 });
                 logger.info(`Removed role from ${guildMember.user.tag}: ${removedRole.name}`);
@@ -112,53 +111,41 @@ export default class RoleUpdater {
 
         // Add their current rank role if they don't already have it
         if (!guildMember.roles.cache.some((role) => role.id === playerRankGroup!.roleID)) {
-            const newRole = Bot.guild.roles.resolve(playerRankGroup.roleID);
+            const newRole = Bot.guilds[guildID].roles.resolve(playerRankGroup.roleID);
             if (!newRole) {
-                logger.error(`Can't find rank role for ${playerRankGroup.roleID} with rank ${playerRankGroup.rank}`);
+                logger.error(`Can't find rank role for ${playerRankGroup.roleID} with rank ${playerRankGroup.rank}`, {guildID});
                 return;
             }
             await guildMember.roles.add(newRole).catch((err) => {
-                logger.error('Error while adding role');
+                logger.error('Error while adding role', {guildID});
                 logger.error(err);
             });
             logger.info(`Added role to ${guildMember.user.tag}: ${newRole.name}`);
         }
     }
 
-    public static async updateRegionRole(guildUser: GuildUser) {
+    public static async updateRegionRole(guildUser: GuildUser, guildID: string) {
         // Fetch their GuildMember object
-        const guildMember = await Bot.guild.members.fetch(guildUser.discordID).catch(() => {
+        const guildMember = await Bot.guilds[guildID].members.fetch(guildUser.discordID).catch(() => {
             // If member can't be found, we can ignore the error here, it's handled below
         });
 
-        if (!guildMember) {
-            if (!guildUser.hasLeftServer) { // If this is the first time we've noticed they're missing, send a message
-                logger.notice(`Someone left the server`);
-                logger.notice(`Discord ID: ${guildUser.discordID}\nScoreSaber ID: ${guildUser.scoreSaberID}`);
-                guildUser.hasLeftServer = true;
-                await guildUser.save();
-            }
-            return;
-        }
-
-        if (guildUser.hasLeftServer && guildMember) {
-            guildUser.hasLeftServer = false;
-            await guildUser.save();
-        }
+        if (!guildMember) return;
 
         const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        const roleMap: Dict = guildConfigs.find((guildConfig) => guildConfig.guildID === guildID)!.roleMap;
 
-        const roleID = (roleMap as Dict)[player.country.toLowerCase()] || (roleMap as Dict)[''];
+        const roleID = roleMap[player.country.toLowerCase()] || roleMap[''];
 
         // Add their region role if they don't already have it
         if (!guildMember.roles.cache.some((role) => role.id === roleID)) {
-            const newRole = Bot.guild.roles.resolve(roleID);
+            const newRole = Bot.guilds[guildID].roles.resolve(roleID);
             if (!newRole) {
-                logger.error(`Can't find region role for ${roleID} with region ${player.country}`);
+                logger.error(`Can't find region role for ${roleID} with region ${player.country}`, {guildID});
                 return;
             }
             await guildMember.roles.add(newRole).catch((err) => {
-                logger.error('Error while adding role');
+                logger.error('Error while adding role', {guildID});
                 logger.error(err);
             });
             logger.info(`Added role to ${guildMember.user.tag}: ${newRole.name}`);

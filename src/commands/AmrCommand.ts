@@ -3,7 +3,6 @@ import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
-import {scoresaberRegion} from '../config.json';
 
 export default class AmrCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -30,7 +29,7 @@ export default class AmrCommand implements Command {
 
         const playerAbove = await ScoresaberAPI.fetchPlayerByRank(player.countryRank - 1, player.country);
 
-        const reply = `__**${scoresaberRegion.toUpperCase()} ranks around you:**__
+        const reply = `__**${player.country} ranks around you:**__
 #${playerAbove.countryRank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.
 #${player.countryRank} **You (${player.name})** have ${player.pp}PP.
 #${playerBelow.countryRank} **${playerBelow.name}** has ${(player.pp - playerBelow.pp).toFixed(2)} less PP than you.`;

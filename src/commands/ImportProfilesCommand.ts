@@ -13,7 +13,8 @@ function printRow(row: {discordId: string, ssId: string}): void {
 export default class ImportProfilesCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
         .setName('import-profiles')
-        .setDescription('Imports');
+        .setDescription('Imports')
+        .setDefaultMemberPermissions(0);
 
     public async execute(interaction: CommandInteraction) {
         const name = './bbsdFormatted.json';

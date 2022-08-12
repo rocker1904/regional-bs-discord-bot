@@ -20,12 +20,6 @@ export default class RegisterCommand implements Command {
         const user = interaction.user;
         const scoreSaber = interaction.options.getString('scoresaber')!; // Required option so should be safe to assert not null
 
-        // Check command was used within the server
-        if (!interaction.member) {
-            await interaction.reply(Strings.GUILD_ONLY);
-            return;
-        }
-
         // Test if given an invalid ScoreSaber ID
         const scoreSaberID = extractScoreSaberID(scoreSaber);
         if (scoreSaberID === null) {
@@ -49,7 +43,7 @@ export default class RegisterCommand implements Command {
         guildUser.discordID = user.id;
         guildUser.scoreSaberID = scoreSaberID;
         await guildUser.save();
-        await RoleUpdater.updateRegionRole(guildUser);
+        if (interaction.guildId) await RoleUpdater.updateRegionRole(guildUser, interaction.guildId);
         await interaction.reply(Strings.REGISTRATION_SUCCESS);
     }
 }
