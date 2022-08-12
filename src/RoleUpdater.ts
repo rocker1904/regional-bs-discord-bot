@@ -59,8 +59,8 @@ export default class RoleUpdater {
 
             if (!guildMember) {
                 if (!guildUser.hasLeftServer) { // If this is the first time we've noticed they're missing, send a message
-                    logger.info(`Someone left the server`);
-                    logger.info(`Discord ID: ${guildUser.discordID}\nScoreSaber ID: ${guildUser.scoreSaberID}`);
+                    logger.notice(`Someone left the server`);
+                    logger.notice(`Discord ID: ${guildUser.discordID}\nScoreSaber ID: ${guildUser.scoreSaberID}`);
                     guildUser.hasLeftServer = true;
                 }
                 continue;
