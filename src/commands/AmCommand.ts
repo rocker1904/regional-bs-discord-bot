@@ -19,15 +19,15 @@ export default class AmCommand implements Command {
         }
 
         // Get data for profiles around the user
-        const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
-        const playerBelow = await ScoresaberAPI.getPlayerByRank(player.rank + 1);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        const playerBelow = await ScoresaberAPI.fetchPlayerByRank(player.rank + 1);
 
         if (player.rank === 1) {
             await interaction.reply(`You are ${(player.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
             return;
         }
 
-        const playerAbove = await ScoresaberAPI.getPlayerByRank(player.rank - 1);
+        const playerAbove = await ScoresaberAPI.fetchPlayerByRank(player.rank - 1);
 
         const reply = `__**Global ranks around you:**__
 #${playerAbove.rank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.

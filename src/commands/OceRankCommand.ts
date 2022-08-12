@@ -21,7 +21,7 @@ export default class OceRankCommand implements Command {
         }
 
         // Get data for profiles around the user
-        const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
         if (player.country !== 'AU' && player.country !== 'NZ') {
             await interaction.reply('You\'re not from OCE.');
             return;
@@ -43,7 +43,7 @@ export default class OceRankCommand implements Command {
             return;
         }
 
-        const playerAbove = await ScoresaberAPI.getPlayerByRank(player.rank - 1);
+        const playerAbove = await ScoresaberAPI.fetchPlayerByRank(player.rank - 1);
         let reply = `__**Global ranks around you:**__
 #${playerAbove.rank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.
 #${player.rank} **You (${player.name})** have ${player.pp}PP.`;

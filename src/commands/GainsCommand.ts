@@ -19,7 +19,7 @@ export default class GainsCommand implements Command {
         }
 
         // Get the user's Scoresaber
-        const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
         const gainsData = guildUser.gainsData;
 
         if (!gainsData) {

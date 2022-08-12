@@ -20,15 +20,15 @@ export default class AmrCommand implements Command {
         }
 
         // Get data for profiles around the user
-        const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
-        const playerBelow = await ScoresaberAPI.getPlayerByRank(player.countryRank + 1, player.country);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        const playerBelow = await ScoresaberAPI.fetchPlayerByRank(player.countryRank + 1, player.country);
 
         if (player.rank === 1) {
             await interaction.reply(`You are ${(player.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
             return;
         }
 
-        const playerAbove = await ScoresaberAPI.getPlayerByRank(player.countryRank - 1, player.country);
+        const playerAbove = await ScoresaberAPI.fetchPlayerByRank(player.countryRank - 1, player.country);
 
         const reply = `__**${scoresaberRegion.toUpperCase()} ranks around you:**__
 #${playerAbove.countryRank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.

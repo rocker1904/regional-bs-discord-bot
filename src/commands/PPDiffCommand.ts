@@ -38,7 +38,7 @@ export default class PPDiffCommand implements Command {
         }
 
         // Get the user's Scoresaber
-        const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
 
         // Depending on sub command, Get target player's Scoresaber and Return difference
         if (interaction.options.getSubcommand() === 'scoresaber') {
@@ -52,7 +52,7 @@ export default class PPDiffCommand implements Command {
             }
 
             // Get target's Scoresaber and PP Difference
-            const targetPlayer = await ScoresaberAPI.getPlayerByID(scoresaberID);
+            const targetPlayer = await ScoresaberAPI.fetchBasicPlayer(scoresaberID);
             const PPDiff = Math.abs(targetPlayer.pp - player.pp);
 
             await interaction.reply(this.diffString(PPDiff, player, targetPlayer));
@@ -66,7 +66,7 @@ export default class PPDiffCommand implements Command {
             }
 
             // Get target's Scoresaber and PP Difference
-            const targetPlayer = await ScoresaberAPI.getPlayerByID(targetUser.scoreSaberID);
+            const targetPlayer = await ScoresaberAPI.fetchBasicPlayer(targetUser.scoreSaberID);
             const PPDiff = Math.abs(targetPlayer.pp - player.pp);
 
             await interaction.reply(this.diffString(PPDiff, player, targetPlayer));

@@ -63,7 +63,7 @@ export interface Score {
     maxCombo: number;
     fullCombo: boolean;
     hmd: number;
-    timeSet: Date;
+    timeSet: string;
 }
 
 export interface LeaderboardFilterOptions {

@@ -38,13 +38,13 @@ export default class RoleUpdater {
         // Update region ranks
         const finalregionRankGroup = regionRankGroups.at(-1);
         if (!finalregionRankGroup) return;
-        const regionalPlayers = await ScoresaberAPI.getPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
+        const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
         await this.updateRankRoles(regionalPlayers, regionRankGroups, true);
 
         // Update global ranks
         const finalGlobalRankGroup = globalRankGroups.at(-1);
         if (!finalGlobalRankGroup) return;
-        const globalPlayers = await ScoresaberAPI.getPlayersUnderRank(finalGlobalRankGroup.rank);
+        const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank);
         await this.updateRankRoles(globalPlayers, globalRankGroups);
     }
 
@@ -146,7 +146,7 @@ export default class RoleUpdater {
             await guildUser.save();
         }
 
-        const player = await ScoresaberAPI.getPlayerByID(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
 
         const roleID = (roleMap as Dict)[player.country.toLowerCase()] || (roleMap as Dict)[''];
 
