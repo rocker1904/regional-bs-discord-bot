@@ -3,9 +3,14 @@ import {GuildUser} from '../entity/GuildUser';
 import Command from './Command';
 import Strings from '../util/Strings';
 import ScoresaberAPI from '../api/scoresaber';
-import axios from 'axios';
+import Axios from 'axios';
 import {Player} from '../api/scoresaber/types/PlayerData';
 import logger from '../util/logger';
+import axiosRetry from 'axios-retry';
+
+axiosRetry(Axios, {
+    retries: 3,
+});
 
 export default class OceRankCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -36,7 +41,7 @@ export default class OceRankCommand implements Command {
             return;
         }
 
-        const resp = await axios.get('https://leaderboard-api.ocebs.com/rest/v1/player');
+        const resp = await Axios.get('https://leaderboard-api.ocebs.com/rest/v1/player');
         const ocePlayers = resp.data as {scoresaberID: string, data: Player}[];
         ocePlayers.sort((a, b) => b.data.pp - a.data.pp);
         const idx = ocePlayers.findIndex((ocePlayer) => ocePlayer.data.id === player.id);
