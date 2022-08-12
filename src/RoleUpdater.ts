@@ -48,18 +48,26 @@ export default class RoleUpdater {
 
     private async updateRankRoles(players: Player[], rankGroups: RankGroup[], regional = false): Promise<void> {
         for (const player of players) {
-            // Request the discord id of the individual with this Scoresaber profile from the database
+            // Request the Discord ID of the individual with this ScoreSaber profile from the database
             const guildUser = await GuildUser.findOne({where: {scoreSaberID: player.id}});
             if (!guildUser) continue;
 
-            // Get their guildMember object
-            const guildMember = await Bot.guild.members.fetch(guildUser.discordID).catch((err) => {
-                logger.error(err);
+            // Fetch their GuildMember object
+            const guildMember = await Bot.guild.members.fetch(guildUser.discordID).catch(() => {
+                // If member can't be found, we can ignore the error here, it's handled below
             });
+
             if (!guildMember) {
-                logger.error(`No guildMember`);
-                logger.error(`discord id: ${guildUser.discordID} scoresaber: ${guildUser.scoreSaberID}`);
-                return;
+                if (!guildUser.hasLeftServer) { // If this is the first time we've noticed they're missing, send a message
+                    logger.info(`Someone left the server`);
+                    logger.info(`Discord ID: ${guildUser.discordID}\nScoreSaber ID: ${guildUser.scoreSaberID}`);
+                    guildUser.hasLeftServer = true;
+                }
+                continue;
+            }
+
+            if (guildUser.hasLeftServer && guildMember) {
+                guildUser.hasLeftServer = false;
             }
             const playerRank = regional ? player.countryRank : player.rank;
 
