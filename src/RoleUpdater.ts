@@ -52,7 +52,7 @@ export default class RoleUpdater {
 
             // Update global ranks
             const finalGlobalRankGroup = globalRankGroups.at(-1);
-            if (finalGlobalRankGroup) {
+            if (finalGlobalRankGroup) { // Won't run if globalRankGroups is empty
                 const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank);
                 await this.updateRankRoles(globalPlayers, globalRankGroups, guildID);
             }
@@ -133,7 +133,7 @@ export default class RoleUpdater {
         if (!guildMember) return;
 
         const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
-        const roleMap: Dict = guildConfigs.find((guildConfig) => guildConfig.guildID === guildID)!.roleMap;
+        const roleMap = guildConfigs.find((guildConfig) => guildConfig.guildID === guildID)!.roleMap as Dict;
 
         const roleID = roleMap[player.country.toLowerCase()] || roleMap[''];
 
