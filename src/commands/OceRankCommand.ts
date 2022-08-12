@@ -19,14 +19,14 @@ export default class OceRankCommand implements Command {
         const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}});
 
         if (!guildUser) {
-            await interaction.reply(Strings.NO_USER);
+            await interaction.editReply(Strings.NO_USER);
             return;
         }
 
         // Get data for profiles around the user
         const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
         if (player.country !== 'AU' && player.country !== 'NZ') {
-            await interaction.reply('You\'re not from OCE.');
+            await interaction.editReply('You\'re not from OCE.');
             return;
         }
 
@@ -36,13 +36,13 @@ export default class OceRankCommand implements Command {
         const idx = ocePlayers.findIndex((ocePlayer) => ocePlayer.scoresaberID === player.id);
 
         if (idx === -1) {
-            await interaction.reply('Sorry, you\'re not high enough rank for this command to work, please complain to Byhemechi :)');
+            await interaction.editReply('Sorry, you\'re not high enough rank for this command to work, please complain to Byhemechi :)');
             return;
         }
 
         if (idx === 0) {
             const playerBelow = ocePlayers[1].data;
-            await interaction.reply(`You are ${(player.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
+            await interaction.editReply(`You are ${(player.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
             return;
         }
 
