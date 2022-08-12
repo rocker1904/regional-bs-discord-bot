@@ -56,6 +56,6 @@ export default class OceRankCommand implements Command {
             reply += `\n#${playerBelow.rank} **${playerBelow.name}** has ${(player.pp - playerBelow.pp).toFixed(2)} less PP than you.`;
         }
 
-        await interaction.reply(reply);
+        await interaction.editReply(reply);
     }
 }
