@@ -47,7 +47,7 @@ export default class RoleUpdater {
             const finalregionRankGroup = regionRankGroups.at(-1);
             if (finalregionRankGroup) {
                 const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
-                await this.updateRankRoles(regionalPlayers, regionRankGroups, guildID, true);
+                await this.updateRankRolesOrdered(regionalPlayers, regionRankGroups, guildID, true);
             }
 
             // Update global ranks
@@ -66,7 +66,16 @@ export default class RoleUpdater {
         }
     }
 
-    public static async updateRankRole(player: Player, rankGroups: RankGroup[], guildID: string, regional = false): Promise<void> {
+    // For multiple regions at the same time (ie. AU and NZ for OCE), all players need to be fetched and the indicies used to determine rank
+    public async updateRankRolesOrdered(players: Player[], rankGroups: RankGroup[], guildID: string, regional = false): Promise<void> {
+        let rank = 1;
+        for (const player of players) {
+            await RoleUpdater.updateRankRole(player, rankGroups, guildID, regional, rank);
+            rank++;
+        }
+    }
+
+    public static async updateRankRole(player: Player, rankGroups: RankGroup[], guildID: string, regional = false, rankOverride?: number): Promise<void> {
         // Get the Discord ID of the player with this ScoreSaber profile from the database
         const guildUser = await GuildUser.findOne({where: {scoreSaberID: player.id}});
         if (!guildUser) return;
@@ -77,7 +86,7 @@ export default class RoleUpdater {
         });
 
         if (!guildMember) return;
-        const playerRank = regional ? player.countryRank : player.rank;
+        const playerRank = rankOverride || regional ? player.countryRank : player.rank;
 
         // Work out which rank group they fall under
         let playerRankGroup: RankGroup | undefined;
