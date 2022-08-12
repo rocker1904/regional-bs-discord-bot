@@ -53,7 +53,14 @@ export default class RoleUpdater {
             if (!guildUser) continue;
 
             // Get their guildMember object
-            const guildMember = await Bot.guild.members.fetch(guildUser.discordID);
+            const guildMember = await Bot.guild.members.fetch(guildUser.discordID).catch((err) => {
+                logger.error(err);
+            });
+            if (!guildMember) {
+                logger.error(`No guildMember`);
+                logger.error(`discord id: ${guildUser.discordID} scoresaber: ${guildUser.scoreSaberID}`);
+                return;
+            }
             const playerRank = regional ? player.countryRank : player.rank;
 
             // Work out which rank group they fall under

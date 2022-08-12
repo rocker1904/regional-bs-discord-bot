@@ -16,7 +16,7 @@ export default class ImportProfilesCommand implements Command {
         .setDescription('Imports');
 
     public async execute(interaction: CommandInteraction) {
-        const name = '../bbsdFormatted.json';
+        const name = './bbsdFormatted.json';
         const data = JSON.parse(fs.readFileSync(`${name}.json`).toString()) as {discordId: string, ssId: string}[];
         for (const row of data) {
             // Test if ScoreSaber ID is valid
