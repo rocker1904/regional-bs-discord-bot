@@ -86,7 +86,7 @@ export default class RoleUpdater {
         });
 
         if (!guildMember) return;
-        const playerRank = rankOverride || regional ? player.countryRank : player.rank;
+        const playerRank = rankOverride || (regional ? player.countryRank : player.rank);
 
         // Work out which rank group they fall under
         let playerRankGroup: RankGroup | undefined;
@@ -97,11 +97,11 @@ export default class RoleUpdater {
             }
         }
 
-        if (player.rank === 0) playerRankGroup = undefined;
+        if (player.rank === 0) playerRankGroup = undefined; // Handles inactive accounts
 
         // Remove rank roles the player shouldn't have
         for (const rankGroup of rankGroups) {
-            if (guildMember.roles.cache.some((role) => role.id === rankGroup.roleID) && rankGroup !== playerRankGroup) {
+            if (guildMember.roles.cache.some((role) => role.id === rankGroup.roleID) && rankGroup.roleID !== playerRankGroup?.roleID) {
                 const removedRole = Bot.guilds[guildID].roles.resolve(rankGroup.roleID);
                 if (!removedRole) {
                     logger.error(`Can't find rank role for ${rankGroup.roleID} with rank ${rankGroup.rank}`, {guildID});
