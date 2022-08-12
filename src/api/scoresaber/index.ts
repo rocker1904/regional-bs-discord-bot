@@ -72,12 +72,17 @@ export default class ScoreSaberAPI {
     public static async fetchPlayersUnderRank(rank: number, region?: string): Promise<Player[]> {
         let players: Player[] = [];
         const totalPages = Math.ceil(rank / 50);
+        const promises = [];
         for (let i = 0; i < totalPages; i++) {
             let request = `players?page=${i + 1}`;
             if (region) request += `&countries=${region}`;
-            const playerCollection = await this.fetchPage(request) as PlayerCollection;
-            players = players.concat(playerCollection.players);
+            const promise = this.fetchPage(request).then((playerCollection) => {
+                players = players.concat((playerCollection as PlayerCollection).players);
+            });
+            promises.push(promise);
         }
+        await Promise.all(promises);
+        players.sort((a, b) => b.pp - a.pp); // Ensure players are in ascending order
         return players;
     }
 
@@ -118,9 +123,7 @@ export default class ScoreSaberAPI {
             });
             promises.push(promise);
         }
-        console.log(`Waiting for ${totalPages} requests to resolve...`);
         await Promise.all(promises);
-        console.log(`Fetched ${totalPages}/${totalPages}.`);
         return playerScores;
     }
 }
