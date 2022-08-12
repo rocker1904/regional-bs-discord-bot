@@ -133,7 +133,7 @@ export default class RoleUpdater {
         if (!guildMember) return;
 
         const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
-        const roleMap = guildConfigs.find((guildConfig) => guildConfig.guildID === guildID)!.roleMap as Dict;
+        const roleMap = guildConfigs.find((guildConfig) => guildConfig.guildID === guildID)!.roleMap as unknown as Dict;
 
         const roleID = roleMap[player.country.toLowerCase()] || roleMap[''];
 

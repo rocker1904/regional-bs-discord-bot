@@ -5,7 +5,6 @@ import Command from './Command';
 import GainsCommand from './GainsCommand';
 import GetCommand from './GetCommand';
 import GibPPCommand from './GibPPCommand';
-import ImportProfilesCommand from './ImportProfilesCommand';
 import OceRankCommand from './OceRankCommand';
 import PingCommand from './PingCommand';
 import PPDiffCommand from './PPDiffCommand';
@@ -20,7 +19,6 @@ class Commands {
         new AmrCommand(),
         new GetCommand(),
         new GibPPCommand(),
-        new ImportProfilesCommand(),
         new OceRankCommand(),
         new PingCommand(),
         new GainsCommand(),
