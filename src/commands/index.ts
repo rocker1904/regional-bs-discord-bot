@@ -7,9 +7,11 @@ import GetCommand from './GetCommand';
 import GibPPCommand from './GibPPCommand';
 import OceRankCommand from './OceRankCommand';
 import PingCommand from './PingCommand';
+import PongCommand from './PongCommand';
 import PPDiffCommand from './PPDiffCommand';
 import RegisterCommand from './RegisterCommand';
 import RemoveUserCommand from './RemoveUserCommand';
+import RoleUpdateCommand from './RoleUpdateCommand';
 import UnregisterCommand from './UnregisterCommand';
 
 class Commands {
@@ -17,14 +19,16 @@ class Commands {
         new AddUserCommand(),
         new AmCommand(),
         new AmrCommand(),
+        new GainsCommand(),
         new GetCommand(),
         new GibPPCommand(),
         new OceRankCommand(),
         new PingCommand(),
-        new GainsCommand(),
+        new PongCommand(),
         new PPDiffCommand(),
         new RegisterCommand(),
         new RemoveUserCommand(),
+        new RoleUpdateCommand(),
         new UnregisterCommand(),
     ];
 }
