@@ -14,6 +14,6 @@ export class GuildUser extends BaseEntity {
     @JoinColumn()
     public gainsData!: GainsCommandData;
 
-    @Column()
-    public hasLeftServer!: boolean;
+    @Column('boolean', {default: false})
+    public hasLeftServer = false;
 }
