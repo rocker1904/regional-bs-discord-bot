@@ -59,7 +59,7 @@ export default class RoleUpdater {
             // Work out which rank group they fall under
             let playerRankGroup: RankGroup | undefined;
             for (const rankGroup of rankGroups) {
-                if (rankGroup.rank > playerRank) {
+                if (rankGroup.rank >= playerRank) {
                     playerRankGroup = rankGroup;
                     break;
                 }
