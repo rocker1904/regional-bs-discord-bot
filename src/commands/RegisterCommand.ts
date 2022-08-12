@@ -1,5 +1,6 @@
 import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
+import RoleUpdater from '../RoleUpdater';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -18,6 +19,12 @@ export default class RegisterCommand implements Command {
         if (!interaction.isChatInputCommand()) return;
         const user = interaction.user;
         const scoreSaber = interaction.options.getString('scoresaber')!; // Required option so should be safe to assert not null
+
+        // Check command was used within the server
+        if (!interaction.member) {
+            await interaction.reply(Strings.GUILD_ONLY);
+            return;
+        }
 
         // Test if given an invalid ScoreSaber ID
         const scoreSaberID = extractScoreSaberID(scoreSaber);
@@ -42,6 +49,7 @@ export default class RegisterCommand implements Command {
         guildUser.discordID = user.id;
         guildUser.scoreSaberID = scoreSaberID;
         await guildUser.save();
+        await RoleUpdater.updateRegionRole(guildUser);
         await interaction.reply(Strings.REGISTRATION_SUCCESS);
     }
 }

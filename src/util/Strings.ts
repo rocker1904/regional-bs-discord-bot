@@ -1,5 +1,6 @@
 export default class Strings {
     public static INVALID_PROFILE = 'Invalid profile';
+    public static GUILD_ONLY = 'Command must be used in a guild';
     public static NO_PROFILE = 'Could not find profile';
     public static PROFILE_ALREADY_REGISTERED = 'ScoreSaber profile is already registered';
     public static NO_USER = 'Could not find user';
