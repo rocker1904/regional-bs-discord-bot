@@ -5,6 +5,7 @@ import Strings from '../util/Strings';
 import ScoresaberAPI from '../api/scoresaber';
 import axios from 'axios';
 import {Player} from '../api/scoresaber/types/PlayerData';
+import logger from '../util/logger';
 
 export default class OceRankCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -23,8 +24,13 @@ export default class OceRankCommand implements Command {
             return;
         }
 
-        // Get data for profiles around the user
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        // Get region of this player
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID).catch((err) => {
+            logger.error('OCE rank command failed. Error fetching player.');
+            logger.error(err);
+            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+        });
+        if (!player) return;
         if (player.country !== 'AU' && player.country !== 'NZ') {
             await interaction.editReply('You\'re not from OCE.');
             return;

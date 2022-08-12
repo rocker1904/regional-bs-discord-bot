@@ -14,10 +14,10 @@ export default async function deployCommands(): Promise<void> {
 
     const rest = new REST({version: '9'}).setToken(process.env.BOT_TOKEN);
 
-    // Remove guild specific commands
+    // Clear guild commands
     for (const guildConfig of guildConfigs) {
         await rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildConfig.guildID), {body: []})
-            .then(() => logger.info('Successfully removed guild application commands.'))
+            .then(() => logger.info(`Successfully cleared guild (${guildConfig.guildID}) application commands.`))
             .catch(logger.error);
     }
 

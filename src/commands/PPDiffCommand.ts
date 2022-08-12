@@ -5,6 +5,7 @@ import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import {Player} from '../api/scoresaber/types/PlayerData';
+import logger from '../util/logger';
 
 export default class PPDiffCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -38,7 +39,12 @@ export default class PPDiffCommand implements Command {
         }
 
         // Get the user's Scoresaber
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID).catch((err) => {
+            logger.error('PP diff command failed. Error fetching player.');
+            logger.error(err);
+            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+        });
+        if (!player) return;
 
         // Depending on sub command, Get target player's Scoresaber and Return difference
         if (interaction.options.getSubcommand() === 'scoresaber') {
@@ -52,7 +58,12 @@ export default class PPDiffCommand implements Command {
             }
 
             // Get target's Scoresaber and PP Difference
-            const targetPlayer = await ScoresaberAPI.fetchBasicPlayer(scoresaberID);
+            const targetPlayer = await ScoresaberAPI.fetchBasicPlayer(scoresaberID).catch((err) => {
+                logger.error('Gains command failed. Error fetching target player.');
+                logger.error(err);
+                void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+            });
+            if (!targetPlayer) return;
             const PPDiff = Math.abs(targetPlayer.pp - player.pp);
 
             await interaction.reply(this.diffString(PPDiff, player, targetPlayer));
@@ -66,7 +77,12 @@ export default class PPDiffCommand implements Command {
             }
 
             // Get target's Scoresaber and PP Difference
-            const targetPlayer = await ScoresaberAPI.fetchBasicPlayer(targetUser.scoreSaberID);
+            const targetPlayer = await ScoresaberAPI.fetchBasicPlayer(targetUser.scoreSaberID).catch((err) => {
+                logger.error('Gains command failed. Error fetching target player.');
+                logger.error(err);
+                void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+            });
+            if (!targetPlayer) return;
             const PPDiff = Math.abs(targetPlayer.pp - player.pp);
 
             await interaction.reply(this.diffString(PPDiff, player, targetPlayer));

@@ -46,14 +46,22 @@ export default class RoleUpdater {
             // Update region ranks
             const finalregionRankGroup = regionRankGroups.at(-1);
             if (finalregionRankGroup) {
-                const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion);
+                const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion).catch((err) => {
+                    logger.error('Regional role update failed. Error fetching players.');
+                    logger.error(err);
+                });
+                if (!regionalPlayers) return;
                 await this.updateRankRolesOrdered(regionalPlayers, regionRankGroups, guildID, true);
             }
 
             // Update global ranks
             const finalGlobalRankGroup = globalRankGroups.at(-1);
             if (finalGlobalRankGroup) { // Won't run if globalRankGroups is empty
-                const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank);
+                const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank).catch((err) => {
+                    logger.error('Global role update failed. Error fetching players.');
+                    logger.error(err);
+                });
+                if (!globalPlayers) return;
                 await this.updateRankRoles(globalPlayers, globalRankGroups, guildID);
             }
         }
@@ -111,7 +119,7 @@ export default class RoleUpdater {
                     logger.error('Error while removing roles', {guildID});
                     logger.error(err);
                 });
-                logger.info(`Removed role from ${guildMember.user.tag}: ${removedRole.name}`);
+                logger.info(`Removed role in ${Bot.guilds[guildID].name} from ${guildMember.user.tag}: ${removedRole.name}`);
             }
         }
 
@@ -129,7 +137,7 @@ export default class RoleUpdater {
                 logger.error('Error while adding role', {guildID});
                 logger.error(err);
             });
-            logger.info(`Added role to ${guildMember.user.tag}: ${newRole.name}`);
+            logger.info(`Added role in ${Bot.guilds[guildID].name} to ${guildMember.user.tag}: ${newRole.name}`);
         }
     }
 
@@ -141,7 +149,11 @@ export default class RoleUpdater {
 
         if (!guildMember) return;
 
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID).catch((err) => {
+            logger.error('User regional role update failed. Error fetching player.');
+            logger.error(err);
+        });
+        if (!player) return;
         const roleMap = guildConfigs.find((guildConfig) => guildConfig.guildID === guildID)!.roleMap as unknown as Dict;
 
         const roleID = roleMap[player.country.toLowerCase()] || roleMap[''];

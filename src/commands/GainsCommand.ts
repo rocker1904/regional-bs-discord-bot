@@ -4,6 +4,7 @@ import Strings from '../util/Strings';
 import Command from './Command';
 import ScoresaberAPI from '../api/scoresaber';
 import {GainsCommandData} from '../entity/GainsCommandData';
+import logger from '../util/logger';
 
 export default class GainsCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -19,7 +20,12 @@ export default class GainsCommand implements Command {
         }
 
         // Get the user's Scoresaber
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
+        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID).catch((err) => {
+            logger.error('Gains command failed. Error fetching player.');
+            logger.error(err);
+            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+        });
+        if (!player) return;
         const gainsData = guildUser.gainsData;
 
         if (!gainsData) {

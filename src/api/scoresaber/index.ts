@@ -1,7 +1,8 @@
-import Axios from 'axios';
+import Axios, {AxiosError} from 'axios';
 import {LeaderboardInfo, ScoreCollection} from './types/LeaderboardData';
 import {BasicPlayer, FullPlayer, Player, PlayerCollection, PlayerScore, PlayerScoreCollection} from './types/PlayerData';
 import axiosRetry from 'axios-retry';
+import logger from '../../util/logger';
 
 axiosRetry(Axios, {
     retries: 3,
@@ -26,8 +27,30 @@ export default class ScoreSaberAPI {
         }
 
         // Make the request
-        const response = await Axios.get(this.SS_BASE_URL + relativePath);
+        const response = await Axios.get(this.SS_BASE_URL + relativePath).catch((error: Error | AxiosError) => {
+            if (Axios.isAxiosError(error)) {
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    logger.error(error.response.data);
+                    logger.error(error.response.status);
+                    logger.error(error.response.headers);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js
+                    logger.error(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    logger.error(`Error ${error.message}`);
+                }
+            } else {
+                // Just a stock error
+                logger.error(`Error ${error.message}`);
+            }
+        });
         this.rateLimitRemaining--;
+        if (!response) throw new Error('Page request failed.');
 
         // Update the reset time if it changed
         const ratelimitReset = parseInt(response.headers['x-ratelimit-reset']);
@@ -42,7 +65,7 @@ export default class ScoreSaberAPI {
         const pageNum = Math.ceil(rank / 50);
         let request = `players?page=${pageNum}`;
         if (region) request += `&countries=${region}`;
-        const playerCollection = await this.fetchPage(request) as PlayerCollection; // TODO: Handle request fail
+        const playerCollection = await this.fetchPage(request) as PlayerCollection;
         return playerCollection.players[rank % 50 - 1];
     }
 
@@ -52,34 +75,34 @@ export default class ScoreSaberAPI {
         for (let i = 0; i < totalPages; i++) {
             let request = `players?page=${i + 1}`;
             if (region) request += `&countries=${region}`;
-            const playerCollection = await this.fetchPage(request) as PlayerCollection; // TODO: Handle request fail
+            const playerCollection = await this.fetchPage(request) as PlayerCollection;
             players = players.concat(playerCollection.players);
         }
         return players;
     }
 
     public static async fetchBasicPlayer(playerId: string): Promise<BasicPlayer> {
-        const basicPlayer = await this.fetchPage(`player/${playerId}/basic`) as BasicPlayer; // TODO: Handle request fail
+        const basicPlayer = await this.fetchPage(`player/${playerId}/basic`) as BasicPlayer;
         return basicPlayer;
     }
 
     public static async fetchFullPlayer(playerId: string): Promise<FullPlayer> {
-        const fullPlayer = await this.fetchPage(`player/${playerId}/full`) as FullPlayer; // TODO: Handle request fail
+        const fullPlayer = await this.fetchPage(`player/${playerId}/full`) as FullPlayer;
         return fullPlayer;
     }
 
     public static async fetchScoresPage(playerId: string, pageNum: number): Promise<PlayerScoreCollection> {
-        const scoresPage = await this.fetchPage(`player/${playerId}/scores?limit=100&sort=recent&page=${pageNum}`) as PlayerScoreCollection; // TODO: Handle request fail
+        const scoresPage = await this.fetchPage(`player/${playerId}/scores?limit=100&sort=recent&page=${pageNum}`) as PlayerScoreCollection;
         return scoresPage;
     }
 
     public static async fetchLeaderboardScores(leaderboardId: number, page = 1): Promise<ScoreCollection> {
-        const scoreCollection = await this.fetchPage(`leaderboard/by-id/${leaderboardId}/scores?page=${page}`) as ScoreCollection; // TODO: Handle request fail
+        const scoreCollection = await this.fetchPage(`leaderboard/by-id/${leaderboardId}/scores?page=${page}`) as ScoreCollection;
         return scoreCollection;
     }
 
     public static async fetchLeaderboardInfo(leaderboardId: number): Promise<LeaderboardInfo> {
-        const scoreCollection = await this.fetchPage(`leaderboard/by-id/${leaderboardId}/info`) as LeaderboardInfo; // TODO: Handle request fail
+        const scoreCollection = await this.fetchPage(`leaderboard/by-id/${leaderboardId}/info`) as LeaderboardInfo;
         return scoreCollection;
     }
 
