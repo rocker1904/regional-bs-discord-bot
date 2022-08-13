@@ -58,7 +58,7 @@ export default class OceRankCommand implements Command {
         }
 
         const playerAbove = ocePlayers[idx - 1].data;
-        let reply = `__**Global ranks around you:**__
+        let reply = `__**OCE ranks around you:**__
 #${idx} **${playerAbove.name}** has ${(playerAbove.pp - ocePlayers[idx].data.pp).toFixed(2)} more PP than you.
 #${idx + 1} **You (${player.name})** have ${ocePlayers[idx].data.pp}PP.`;
 
