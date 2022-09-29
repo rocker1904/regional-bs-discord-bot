@@ -16,6 +16,7 @@ export default class Bot {
     public static client: Client;
     public static guilds: {[key: string]: Guild} = {}; // Guild ID -> Guild
     public static logChannels: {[key: string]: TextChannel} = {}; // Guild ID -> log channel
+    public static rankupFeedChannels: {[key: string]: TextChannel} = {};
     public static staffIDs: {[key: string]: string} = {}; // Guild ID -> staff ID
     public static dataSource: DataSource;
     public static updater: RoleUpdater;
