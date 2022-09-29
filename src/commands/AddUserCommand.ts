@@ -3,6 +3,7 @@ import {GuildUser} from '../entity/GuildUser';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import Command from './Command';
 import Strings from '../util/Strings';
+import RoleUpdater from '../RoleUpdater';
 
 export default class AddUserCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -48,6 +49,7 @@ export default class AddUserCommand implements Command {
         guildUser.discordID = user.id;
         guildUser.scoreSaberID = scoreSaberID;
         await guildUser.save();
+        if (interaction.guildId) await RoleUpdater.updateRegionRole(guildUser, interaction.guildId);
         await interaction.reply(Strings.REGISTRATION_SUCCESS);
     }
 }
