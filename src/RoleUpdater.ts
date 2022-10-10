@@ -138,6 +138,9 @@ export default class RoleUpdater {
                 logger.error(err);
             });
             logger.info(`Added role in ${Bot.guilds[guildID].name} to ${guildMember.user.tag}: ${newRole.name}`);
+            if (Bot.rankupFeedChannels[guildID]) {
+                await Bot.rankupFeedChannels[guildID].send(`${guildMember.displayName} has advanced to ${newRole.name}`);
+            }
         }
     }
 

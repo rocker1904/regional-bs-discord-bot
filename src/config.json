@@ -5,6 +5,7 @@
             "guildID": "951918594189557791",
             "staffID": "967077862354079784",
             "logChannelID": "951918672174284873",
+            "rankupFeedChannelID": "",
             "regionRankGroups": [
                 {"roleID": "967076725773205554", "rank": 1}, 
                 {"roleID": "967076788389961748", "rank": 10},

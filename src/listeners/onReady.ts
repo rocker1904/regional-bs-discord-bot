@@ -20,6 +20,15 @@ export default async function onReady(): Promise<void> {
         }
         Bot.logChannels[guildConfig.guildID] = logChannel;
 
+        if (guildConfig.rankupFeedChannelID) {
+            const rankupFeedChannel = await guild.channels.fetch(guildConfig.rankupFeedChannelID as string);
+            if (!rankupFeedChannel || rankupFeedChannel.type !== ChannelType.GuildText) {
+                console.error(`Log channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
+                return;
+            }
+            Bot.rankupFeedChannels[guildConfig.guildID] = rankupFeedChannel;
+        }
+
         Bot.staffIDs[guildConfig.guildID] = guildConfig.staffID; // Todo: Validation of role
 
         await guild.members.fetch(); // Get and cache server members
