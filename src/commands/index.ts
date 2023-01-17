@@ -2,6 +2,7 @@ import AddUserCommand from './AddUserCommand';
 import AmCommand from './AmCommand';
 import AmrCommand from './AmrCommand';
 import Command from './Command';
+import CounterCommand from './CounterCommand';
 import GainsCommand from './GainsCommand';
 import GetCommand from './GetCommand';
 import GibPPCommand from './GibPPCommand';
@@ -19,6 +20,7 @@ class Commands {
         new AddUserCommand(),
         new AmCommand(),
         new AmrCommand(),
+        new CounterCommand(),
         new GainsCommand(),
         new GetCommand(),
         new GibPPCommand(),
