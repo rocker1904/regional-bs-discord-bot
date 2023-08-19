@@ -6,6 +6,8 @@
             "staffID": "967077862354079784",
             "logChannelID": "951918672174284873",
             "rankupFeedChannelID": "",
+            "progressReportChannelID": "",
+            "progressReportMaxRegionRank": 100,
             "regionRankGroups": [
                 {"roleID": "967076725773205554", "rank": 1}, 
                 {"roleID": "967076788389961748", "rank": 10},
