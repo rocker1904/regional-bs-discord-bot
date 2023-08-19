@@ -1,9 +1,9 @@
 import { TextChannel } from 'discord.js';
-import ScoresaberAPI from './api/scoresaber';
-import {Player} from './api/scoresaber/types/PlayerData';
-import Bot from './Bot';
-import {guildConfigs} from './config.json';
-import logger from './util/logger';
+import ScoresaberAPI from '../api/scoresaber';
+import {Player} from '../api/scoresaber/types/PlayerData';
+import Bot from '../Bot';
+import {guildConfigs} from '../config.json';
+import logger from '../util/logger';
 import Canvas from '@napi-rs/canvas';
 
 type PlayerPageEntry = {player: Player, colour: string};
@@ -29,14 +29,12 @@ export default class ProgressReport {
 
     public async main() {
         for (const guildConfig of guildConfigs) {
-            const {guildID, progressReportChannelID, progressReportMaxRegionRank, regionRankGroups, scoreSaberRegions} = guildConfig;
-
-            logger.info(guildID+", "+progressReportChannelID+", "+progressReportMaxRegionRank+", "+scoreSaberRegions);
+            const {guildID, progressReportConfig, regionRankGroups, scoreSaberRegions} = guildConfig;
 
             const channel = Bot.progressReportChannels[guildID];
             if (!channel) return;
             const scoreSaberRegion = scoreSaberRegions.join(',');
-            let topCountryRankPlayers = await ScoresaberAPI.fetchPlayersUnderRank(progressReportMaxRegionRank, scoreSaberRegion).catch((err) => {
+            let topCountryRankPlayers = await ScoresaberAPI.fetchPlayersUnderRank(progressReportConfig?.maxRegionRank, scoreSaberRegion).catch((err) => {
                 logger.error('Progress report failed. Error fetching players.');
                 logger.error(err);
             });

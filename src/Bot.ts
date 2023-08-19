@@ -5,7 +5,7 @@ import deployCommands from './util/deployCommands';
 import logger from './util/logger';
 import onReady from './listeners/onReady';
 import onInteraction from './listeners/onInteraction';
-import ProgressReport from './ProgressReport';
+import ProgressReport from './progress-report/ProgressReport';
 import RoleUpdater from './RoleUpdater';
 import onGuildMemberAdd from './listeners/onGuildMemberAdd';
 import ScoreFeed from './score-feed/ScoreFeed';

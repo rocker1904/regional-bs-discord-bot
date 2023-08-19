@@ -3,7 +3,7 @@ import Bot from '../Bot';
 import RoleUpdater from '../RoleUpdater';
 import logger from '../util/logger';
 import config from '../config.json';
-import ProgressReport from '../ProgressReport';
+import ProgressReport from '../progress-report/ProgressReport';
 import ScoreFeed from '../score-feed/ScoreFeed';
 
 export default async function onReady(): Promise<void> {
@@ -31,8 +31,8 @@ export default async function onReady(): Promise<void> {
             Bot.rankupFeedChannels[guildConfig.guildID] = rankupFeedChannel;
         }
 
-        if (guildConfig.progressReportChannelID) {
-            const progressReportChannel = await guild.channels.fetch(guildConfig.progressReportChannelID as string);
+        if (guildConfig.progressReportConfig?.channelID) {
+            const progressReportChannel = await guild.channels.fetch(guildConfig.progressReportConfig?.channelID as string);
             if (!progressReportChannel || progressReportChannel.type !== ChannelType.GuildText) {
                 console.error(`Progress report channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
                 return;
