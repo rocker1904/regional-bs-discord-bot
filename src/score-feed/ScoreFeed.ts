@@ -85,6 +85,7 @@ export default class ScoreFeed {
         );
 
         for (const {guildID, scoreFeedConfig, scoreSaberRegions} of guildConfigs) {
+            if (!scoreFeedConfig) continue;
             const combinedRegions = scoreSaberRegions.join(',');
             const regionalScoreCollection = await ScoreSaberAPI.fetchLeaderboardScores(leaderboard.id, 1, combinedRegions);
             const regionalScores = regionalScoreCollection.scores;
