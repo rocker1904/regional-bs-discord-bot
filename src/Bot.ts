@@ -7,6 +7,7 @@ import onReady from './listeners/onReady';
 import onInteraction from './listeners/onInteraction';
 import RoleUpdater from './RoleUpdater';
 import onGuildMemberAdd from './listeners/onGuildMemberAdd';
+import ScoreFeed from './score-feed/ScoreFeed';
 
 type Mutable<Type> = {
     -readonly [Key in keyof Type]: Type[Key];
@@ -15,11 +16,13 @@ type Mutable<Type> = {
 export default class Bot {
     public static client: Client;
     public static guilds: {[key: string]: Guild} = {}; // Guild ID -> Guild
-    public static logChannels: {[key: string]: TextChannel} = {}; // Guild ID -> log channel
-    public static rankupFeedChannels: {[key: string]: TextChannel} = {};
+    public static logChannels: {[key: string]: TextChannel} = {}; // Guild ID -> log Channel
+    public static rankupFeedChannels: {[key: string]: TextChannel} = {}; // Guild ID -> rankup feed Channel
+    public static scoreFeedChannels: {[key: string]: TextChannel} = {}; // Guild ID -> score feed Channel
     public static staffIDs: {[key: string]: string} = {}; // Guild ID -> staff ID
     public static dataSource: DataSource;
-    public static updater: RoleUpdater;
+    public static roleUpdater: RoleUpdater;
+    public static scoreFeed: ScoreFeed;
 }
 
 async function main() {

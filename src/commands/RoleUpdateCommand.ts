@@ -9,7 +9,7 @@ export default class RoleUpdateCommand implements Command {
         .setDefaultMemberPermissions(0);
 
     public async execute(interaction: CommandInteraction) {
-        void Bot.updater.main();
+        void Bot.roleUpdater.main();
         await interaction.reply('Running update.');
     }
 }
