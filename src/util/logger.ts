@@ -22,7 +22,11 @@ const logger = winston.createLogger({
         winston.format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
-        winston.format.printf((info) => `${info.timestamp as string} ${info.level}: ${info.message as string}`),
+        winston.format.errors({stack: true}),
+        winston.format.printf((info) =>
+            `${info.timestamp as string} ${info.level}: ${info.message as string}` +
+            (info.stack ? `\n${info.stack as string}` : ''),
+        ),
     ),
     transports: [
         // Send all messages to console, write errors to error.log, write info and below to combined.log
@@ -34,7 +38,7 @@ const logger = winston.createLogger({
 
 // If in production, send any message with notice level or below to the discord error channel.
 if (process.env.NODE_ENV === 'production') {
-    logger.add(new DiscordTransport({level: 'debug', format: winston.format.uncolorize()}));
+    logger.add(new DiscordTransport({level: 'notice', format: winston.format.uncolorize()}));
 }
 
 export default logger;
