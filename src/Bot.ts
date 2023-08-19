@@ -5,6 +5,7 @@ import deployCommands from './util/deployCommands';
 import logger from './util/logger';
 import onReady from './listeners/onReady';
 import onInteraction from './listeners/onInteraction';
+import ProgressReport from './ProgressReport';
 import RoleUpdater from './RoleUpdater';
 import onGuildMemberAdd from './listeners/onGuildMemberAdd';
 
@@ -16,10 +17,12 @@ export default class Bot {
     public static client: Client;
     public static guilds: {[key: string]: Guild} = {}; // Guild ID -> Guild
     public static logChannels: {[key: string]: TextChannel} = {}; // Guild ID -> log channel
+    public static progressReportChannels: {[key: string]: TextChannel} = {}; // Guild ID -> progress report channel
     public static rankupFeedChannels: {[key: string]: TextChannel} = {};
     public static staffIDs: {[key: string]: string} = {}; // Guild ID -> staff ID
     public static dataSource: DataSource;
     public static updater: RoleUpdater;
+    public static progressReport: ProgressReport;
 }
 
 async function main() {
