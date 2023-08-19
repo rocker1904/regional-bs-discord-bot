@@ -4,6 +4,7 @@ import RoleUpdater from '../RoleUpdater';
 import logger from '../util/logger';
 import config from '../config.json';
 import ProgressReport from '../ProgressReport';
+import ScoreFeed from '../score-feed/ScoreFeed';
 
 export default async function onReady(): Promise<void> {
     for (const guildConfig of config.guildConfigs) {
@@ -22,9 +23,9 @@ export default async function onReady(): Promise<void> {
         Bot.logChannels[guildConfig.guildID] = logChannel;
 
         if (guildConfig.rankupFeedChannelID) {
-            const rankupFeedChannel = await guild.channels.fetch(guildConfig.rankupFeedChannelID as string);
+            const rankupFeedChannel = await guild.channels.fetch(guildConfig.rankupFeedChannelID);
             if (!rankupFeedChannel || rankupFeedChannel.type !== ChannelType.GuildText) {
-                console.error(`Rankup feed channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
+                console.error(`Rankup channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
                 return;
             }
             Bot.rankupFeedChannels[guildConfig.guildID] = rankupFeedChannel;
@@ -37,6 +38,15 @@ export default async function onReady(): Promise<void> {
                 return;
             }
             Bot.progressReportChannels[guildConfig.guildID] = progressReportChannel;
+		}
+
+        if (guildConfig.scoreFeedConfig?.channelID) {
+            const scoreFeedChannel = await guild.channels.fetch(guildConfig.scoreFeedConfig?.channelID);
+            if (!scoreFeedChannel || scoreFeedChannel.type !== ChannelType.GuildText) {
+                console.error(`Score feed channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
+                return;
+            }
+            Bot.scoreFeedChannels[guildConfig.guildID] = scoreFeedChannel;
         }
 
         Bot.staffIDs[guildConfig.guildID] = guildConfig.staffID; // Todo: Validation of role
@@ -45,8 +55,9 @@ export default async function onReady(): Promise<void> {
         logger.info(`${guild.name} set up! Member count: ${guild.members.cache.size}.`);
     }
 
-    Bot.updater = new RoleUpdater();
+    Bot.roleUpdater = new RoleUpdater();
     Bot.progressReport = new ProgressReport();
+    Bot.scoreFeed = new ScoreFeed();
 
     logger.info(`Ready! User count: ${Bot.client.users.cache.size}.`);
 }

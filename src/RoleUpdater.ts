@@ -40,13 +40,12 @@ export default class RoleUpdater {
 
     public async main() {
         logger.debug('Running role update');
-        for (const guildConfig of guildConfigs) {
-            const {regionRankGroups, globalRankGroups, scoresaberRegion, guildID} = guildConfig;
-
+        for (const {regionRankGroups, globalRankGroups, scoreSaberRegions, guildID} of guildConfigs) {
             // Update region ranks
-            const finalregionRankGroup = regionRankGroups.at(-1);
-            if (finalregionRankGroup) {
-                const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalregionRankGroup.rank, scoresaberRegion).catch((err) => {
+            const lastRegionRankGroup = regionRankGroups.at(-1);
+            if (lastRegionRankGroup) {
+                const scoreSaberRegion = scoreSaberRegions.join(',');
+                const regionalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(lastRegionRankGroup.rank, scoreSaberRegion).catch((err) => {
                     logger.error('Regional role update failed. Error fetching players.');
                     logger.error(err);
                 });
@@ -55,9 +54,9 @@ export default class RoleUpdater {
             }
 
             // Update global ranks
-            const finalGlobalRankGroup = globalRankGroups.at(-1);
-            if (finalGlobalRankGroup) { // Won't run if globalRankGroups is empty
-                const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(finalGlobalRankGroup.rank).catch((err) => {
+            const lastGlobalRankGroup = globalRankGroups.at(-1);
+            if (lastGlobalRankGroup) { // Won't run if globalRankGroups is empty
+                const globalPlayers = await ScoresaberAPI.fetchPlayersUnderRank(lastGlobalRankGroup.rank).catch((err) => {
                     logger.error('Global role update failed. Error fetching players.');
                     logger.error(err);
                 });

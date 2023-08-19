@@ -8,6 +8,11 @@
             "rankupFeedChannelID": "",
             "progressReportChannelID": "",
             "progressReportMaxRegionRank": 100,
+            "scoreFeedConfig": {
+                "channelID": "951918653127946260",
+                "positionRequirement": 10,
+                "allowUnrankedScores": false
+            },
             "regionRankGroups": [
                 {"roleID": "967076725773205554", "rank": 1}, 
                 {"roleID": "967076788389961748", "rank": 10},
@@ -23,7 +28,7 @@
                 {"roleID": "967076919436795974", "rank": 50}, 
                 {"roleID": "967076943075872838", "rank": 100}
             ],
-            "scoresaberRegion": "gb",
+            "scoreSaberRegions": [ "gb" ],
             "roleMap": {
                 "gb": "967076963388911656",
                 "": "967077055915241572"
