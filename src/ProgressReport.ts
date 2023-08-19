@@ -29,14 +29,14 @@ export default class ProgressReport {
 
     public async main() {
         for (const guildConfig of guildConfigs) {
-            const {guildID, progressReportChannelID, progressReportMaxRegionRank, regionRankGroups, scoresaberRegion} = guildConfig;
+            const {guildID, progressReportChannelID, progressReportMaxRegionRank, regionRankGroups, scoreSaberRegions} = guildConfig;
 
-            logger.info(guildID+", "+progressReportChannelID+", "+progressReportMaxRegionRank+", "+scoresaberRegion);
+            logger.info(guildID+", "+progressReportChannelID+", "+progressReportMaxRegionRank+", "+scoreSaberRegions);
 
             const channel = Bot.progressReportChannels[guildID];
             if (!channel) return;
-
-            let topCountryRankPlayers = await ScoresaberAPI.fetchPlayersUnderRank(progressReportMaxRegionRank, scoresaberRegion).catch((err) => {
+            const scoreSaberRegion = scoreSaberRegions.join(',');
+            let topCountryRankPlayers = await ScoresaberAPI.fetchPlayersUnderRank(progressReportMaxRegionRank, scoreSaberRegion).catch((err) => {
                 logger.error('Progress report failed. Error fetching players.');
                 logger.error(err);
             });
