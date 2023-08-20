@@ -91,7 +91,7 @@ export default class ScoreFeed {
             const regionalScores = regionalScoreCollection.scores;
 
             // Setting the first scores on a map shouldn't count
-            if (scoreFeedConfig.positionRequirement >= regionalScores.length) return;
+            // if (scoreFeedConfig.positionRequirement >= regionalScores.length) return;
 
             const regionalPosition = regionalScores.findIndex((regionalScore) => regionalScore.id === score.id) + 1;
             if (regionalPosition === 0 || regionalPosition > scoreFeedConfig.positionRequirement) return;
