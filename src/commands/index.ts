@@ -10,6 +10,7 @@ import OceRankCommand from './OceRankCommand';
 import PingCommand from './PingCommand';
 import PongCommand from './PongCommand';
 import PPDiffCommand from './PPDiffCommand';
+import ProgressReportCommand from './ProgressReportCommand';
 import RegisterCommand from './RegisterCommand';
 import RemoveUserCommand from './RemoveUserCommand';
 import RoleUpdateCommand from './RoleUpdateCommand';
@@ -28,6 +29,7 @@ class Commands {
         new PingCommand(),
         new PongCommand(),
         new PPDiffCommand(),
+        new ProgressReportCommand(),
         new RegisterCommand(),
         new RemoveUserCommand(),
         new RoleUpdateCommand(),

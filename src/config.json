@@ -6,6 +6,8 @@
             "staffID": "967077862354079784",
             "logChannelID": "951918672174284873",
             "rankupFeedChannelID": "",
+            "progressReportChannelID": "",
+            "progressReportMaxRegionRank": 100,
             "scoreFeedConfig": {
                 "channelID": "951918653127946260",
                 "positionRequirement": 10,
