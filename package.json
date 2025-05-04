@@ -7,7 +7,7 @@
     "build": "rimraf ./build && tsc",
     "start": "npm run build && node -r dotenv/config --trace-warnings build/Bot.js",
     "lint": "eslint . --ext .ts",
-    "deploy-commands": "npm run build && node -r dotenv/config build/DeployCommands.js"
+    "deploy-commands": "npm run build && node -r dotenv/config build/util/deployCommands.js"
   },
   "author": "Rocker1904",
   "license": "MIT",
