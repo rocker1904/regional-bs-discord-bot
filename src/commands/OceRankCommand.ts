@@ -2,9 +2,9 @@ import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Command from './Command';
 import Strings from '../util/Strings';
-import ScoresaberAPI from '../api/scoresaber';
+import ScoresaberAPI from 'scoresaber.js';
 import Axios from 'axios';
-import {Player} from '../api/scoresaber/types/PlayerData';
+import {Player} from 'scoresaber.js';
 import logger from '../util/logger';
 import axiosRetry from 'axios-retry';
 

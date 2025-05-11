@@ -1,5 +1,5 @@
-import ScoresaberAPI from './api/scoresaber';
-import {Player} from './api/scoresaber/types/PlayerData';
+import ScoresaberAPI from 'scoresaber.js';
+import {Player} from 'scoresaber.js';
 import Bot from './Bot';
 import {rankUpdateInterval, guildConfigs} from './config.json';
 import {GuildUser} from './entity/GuildUser';

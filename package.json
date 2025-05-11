@@ -32,7 +32,7 @@
     "erlpack": "github:discord/erlpack",
     "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
-    "scoresaber.js": "^0.3.0",
+    "scoresaber.js": "^0.3.1",
     "typeorm": "^0.3.17",
     "utf-8-validate": "^6.0.3",
     "winston": "^3.10.0",

@@ -2,9 +2,9 @@ import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
-import ScoresaberAPI from '../api/scoresaber';
+import ScoresaberAPI from 'scoresaber.js';
 import extractScoreSaberID from '../util/extractScoreSaberID';
-import {Player} from '../api/scoresaber/types/PlayerData';
+import {Player} from 'scoresaber.js';
 import logger from '../util/logger';
 
 export default class PPDiffCommand implements Command {
