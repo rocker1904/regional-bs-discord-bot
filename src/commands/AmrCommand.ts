@@ -2,7 +2,7 @@ import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
-import ScoresaberAPI from '../api/scoresaber';
+import ScoresaberAPI from 'scoresaber.js';
 import logger from '../util/logger';
 
 export default class AmrCommand implements Command {
