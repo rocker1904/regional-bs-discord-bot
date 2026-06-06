@@ -1,4 +1,4 @@
-import {CommandInteraction, CommandInteractionOptionResolver, SlashCommandBuilder} from 'discord.js';
+import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
@@ -15,8 +15,8 @@ export default class RemoveUserCommand implements Command {
         );
 
     public async execute(interaction: CommandInteraction) {
-        const options = interaction.options as CommandInteractionOptionResolver;
-        const user = options.getUser('user')!; // Required options so should be safe to assert not null
+        if (!interaction.isChatInputCommand()) return;
+        const user = interaction.options.getUser('user')!; // Required options so should be safe to assert not null
 
         const guildUser = await GuildUser.findOne({where: {discordID: user.id}});
         if (!guildUser) {
