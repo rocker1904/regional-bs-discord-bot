@@ -1,4 +1,4 @@
-import {ConnectionOptionsReader, DataSource, DataSourceOptions} from 'typeorm';
+import {DataSource} from 'typeorm';
 import 'reflect-metadata';
 import {Client, Guild, IntentsBitField, TextChannel} from 'discord.js';
 import deployCommands from './util/deployCommands';
@@ -8,10 +8,9 @@ import onInteraction from './listeners/onInteraction';
 import RoleUpdater from './RoleUpdater';
 import onGuildMemberAdd from './listeners/onGuildMemberAdd';
 import ScoreFeed from './score-feed/ScoreFeed';
-
-type Mutable<Type> = {
-    -readonly [Key in keyof Type]: Type[Key];
-};
+import {GuildUser} from './entity/GuildUser';
+import {GainsCommandData} from './entity/GainsCommandData';
+import {CounterData} from './entity/CounterData';
 
 export default class Bot {
     public static client: Client;
@@ -27,16 +26,16 @@ export default class Bot {
 
 async function main() {
     logger.info('Connecting to database...');
-    const allDataSourceOptions = await new ConnectionOptionsReader().all();
-    if (allDataSourceOptions.length === 0) {
-        logger.error('Could not find database settings.');
-        process.exit();
-    }
-    const dataSourceOptions = allDataSourceOptions[0] as Mutable<DataSourceOptions>;
-    if (process.env.NODE_ENV === 'production') {
-        dataSourceOptions.extra = {socketPath: '/run/mysqld/mysqld.sock'};
-    }
-    Bot.dataSource = new DataSource(dataSourceOptions);
+    Bot.dataSource = new DataSource({
+        type: 'postgres',
+        host: process.env.DB_HOST ?? '127.0.0.1',
+        port: Number(process.env.DB_PORT ?? 5432),
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_DATABASE,
+        entities: [GuildUser, GainsCommandData, CounterData],
+        synchronize: false,
+    });
     Bot.dataSource.initialize().catch((error) => {
         logger.error('Failed to connect to database');
         logger.error(error);
