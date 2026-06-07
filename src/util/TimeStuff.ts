@@ -36,7 +36,7 @@ export default class TimeStuff {
         return this.twoHighestTimeScales(timeArray);
     }
 
-    private static twoHighestTimeScales(timeArray: {amount: number, scale: string}[]): string {
+    private static twoHighestTimeScales(timeArray: {amount: number; scale: string}[]): string {
         let string = '';
         let valuesFound = 0;
         for (let i = 0; i < timeArray.length; i++) {

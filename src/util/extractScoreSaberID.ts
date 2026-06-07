@@ -16,14 +16,9 @@ export default function extractScoreSaberID(scoreSaber: string): string | null {
         return null;
     }
 
-    // The ID will be followed by either ?, &, or / (or nothing)
-    // Slice to the index of the first character found (or leave the string as it is)
+    // The ID will be followed by either ?, &, or / (or nothing).
+    // Slice to the first such character if one is present.
     const endOfID = scoreSaber.search(/[?&/]/);
-    if (endOfID !== -1) {
-        scoreSaber = scoreSaber.slice(0, endOfID);
-    }
-
-    // Slice to the first ? or & if one was found
     if (endOfID !== -1) {
         scoreSaber = scoreSaber.slice(0, endOfID);
     }

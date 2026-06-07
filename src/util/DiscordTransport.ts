@@ -7,7 +7,7 @@ export default class DiscordTransport extends Transport {
         super(opts);
     }
 
-    async log(info: {level: string, message: string, guildID?: string}, callback: () => void): Promise<void> {
+    async log(info: {level: string; message: string; guildID?: string}, callback: () => void): Promise<void> {
         setImmediate(() => {
             this.emit('logged', info);
         });
@@ -17,7 +17,9 @@ export default class DiscordTransport extends Transport {
                 if (info.message === 'undefined') {
                     await Bot.logChannels[info.guildID].send(`No error message, printing info object:\n${JSON.stringify(info)}`);
                 } else {
-                    await Bot.logChannels[info.guildID].send(`${info.level.charAt(0).toUpperCase() + info.level.slice(1)}: ${info.message}`);
+                    await Bot.logChannels[info.guildID].send(
+                        `${info.level.charAt(0).toUpperCase() + info.level.slice(1)}: ${info.message}`,
+                    );
                 }
             }
         } catch (e) {

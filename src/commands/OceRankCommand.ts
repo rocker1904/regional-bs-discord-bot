@@ -2,15 +2,37 @@ import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Command from './Command';
 import Strings from '../util/Strings';
-import ScoresaberAPI from 'scoresaber.js';
-import Axios from 'axios';
-import {Player} from 'scoresaber.js';
+import scoreSaber from '../util/scoreSaber';
+import safeReply from '../util/safeReply';
 import logger from '../util/logger';
-import axiosRetry from 'axios-retry';
 
-axiosRetry(Axios, {
-    retries: 3,
-});
+// Shape returned by the OCE leaderboard API (leaderboard-api.ocebs.com), which
+// is independent of ScoreSaber. Only the fields the bot reads are declared.
+interface OcePlayer {
+    data: {
+        id: string;
+        name: string;
+        pp: number;
+    };
+}
+
+const OCE_LEADERBOARD_URL = 'https://leaderboard-api.ocebs.com/rest/v1/player';
+
+// The OCE leaderboard API can be flaky, so retry a few times. Deliberately not
+// cached: competitive players set a score and immediately check their new rank.
+async function fetchOcePlayers(retries = 3): Promise<OcePlayer[]> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const response = await fetch(OCE_LEADERBOARD_URL);
+            if (!response.ok) throw new Error(`OCE leaderboard API responded ${response.status}`);
+            return (await response.json()) as OcePlayer[];
+        } catch (error) {
+            lastError = error;
+        }
+    }
+    throw lastError;
+}
 
 export default class OceRankCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -18,42 +40,48 @@ export default class OceRankCommand implements Command {
         .setDescription('Returns the pp diff between you and the people around you on the oce leaderboard.');
 
     public async execute(interaction: CommandInteraction) {
-        // May take time to get players so defer the reply
-        await interaction.deferReply();
-
         // Fetch user from db
         const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}});
 
         if (!guildUser) {
-            await interaction.editReply(Strings.NO_USER);
+            await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
             return;
         }
 
         // Get region of this player
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID).catch((err) => {
+        const player = await scoreSaber.players.getBasic(guildUser.scoreSaberID).catch((err) => {
             logger.error('OCE rank command failed. Error fetching player.');
             logger.error(err);
-            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+            void safeReply(interaction, {content: 'Command failed. Error fetching data from ScoreSaber', ephemeral: true});
         });
         if (!player) return;
         if (player.country !== 'AU' && player.country !== 'NZ') {
-            await interaction.editReply('You\'re not from OCE.');
+            await safeReply(interaction, {content: "You're not from OCE.", ephemeral: true});
             return;
         }
 
-        const resp = await Axios.get('https://leaderboard-api.ocebs.com/rest/v1/player');
-        const ocePlayers = resp.data as {scoresaberID: string, data: Player}[];
+        const ocePlayers = await fetchOcePlayers().catch((err) => {
+            logger.error('OCE rank command failed. Error fetching OCE leaderboard.');
+            logger.error(err);
+        });
+        if (!ocePlayers) {
+            await safeReply(interaction, {content: 'Command failed. Could not reach the OCE leaderboard.', ephemeral: true});
+            return;
+        }
         ocePlayers.sort((a, b) => b.data.pp - a.data.pp);
         const idx = ocePlayers.findIndex((ocePlayer) => ocePlayer.data.id === player.id);
 
         if (idx === -1) {
-            await interaction.editReply('Sorry, you\'re not high enough rank for this command to work, please complain to Byhemechi :)');
+            await safeReply(interaction, {
+                content: "Sorry, you're not high enough rank for this command to work, please complain to Byhemechi :)",
+                ephemeral: true,
+            });
             return;
         }
 
         if (idx === 0) {
             const playerBelow = ocePlayers[1].data;
-            await interaction.editReply(`You are ${(ocePlayers[idx].data.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
+            await safeReply(interaction, `You are ${(ocePlayers[idx].data.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
             return;
         }
 
@@ -67,6 +95,6 @@ export default class OceRankCommand implements Command {
             reply += `\n#${idx + 2} **${playerBelow.name}** has ${(ocePlayers[idx].data.pp - playerBelow.pp).toFixed(2)} less PP than you.`;
         }
 
-        await interaction.editReply(reply);
+        await safeReply(interaction, reply);
     }
 }

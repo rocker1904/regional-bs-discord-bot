@@ -4,6 +4,7 @@ import {GuildUser} from '../entity/GuildUser';
 import extractScoreSaberID from '../util/extractScoreSaberID';
 import Strings from '../util/Strings';
 import Command from './Command';
+import safeReply from '../util/safeReply';
 
 export default class GetCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -11,21 +12,16 @@ export default class GetCommand implements Command {
         .setDescription('Get a user or profile')
         .setDefaultMemberPermissions(0)
         .addSubcommand((subcommand) =>
-            subcommand.setName('user')
+            subcommand
+                .setName('user')
                 .setDescription('Get the user associated with a given profile')
-                .addStringOption((option) =>
-                    option.setName('scoresaber')
-                        .setDescription('ScoreSaber Link or ID')
-                        .setRequired(true),
-                ),
-        ).addSubcommand((subcommand) =>
-            subcommand.setName('profile')
+                .addStringOption((option) => option.setName('scoresaber').setDescription('ScoreSaber Link or ID').setRequired(true)),
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName('profile')
                 .setDescription('Get the profile associated with a given user')
-                .addUserOption((option) =>
-                    option.setName('user')
-                        .setDescription('User to get the profile of')
-                        .setRequired(true),
-                ),
+                .addUserOption((option) => option.setName('user').setDescription('User to get the profile of').setRequired(true)),
         );
 
     public async execute(interaction: CommandInteraction) {
@@ -36,7 +32,7 @@ export default class GetCommand implements Command {
             // Test if given an invalid ScoreSaber ID
             const scoreSaberID = extractScoreSaberID(scoreSaber);
             if (scoreSaberID === null) {
-                await interaction.reply(Strings.INVALID_PROFILE);
+                await safeReply(interaction, {content: Strings.INVALID_PROFILE, ephemeral: true});
                 return;
             }
 
@@ -45,13 +41,16 @@ export default class GetCommand implements Command {
             if (guildUser) {
                 const user = await Bot.client.users.fetch(guildUser.discordID);
                 if (!user) {
-                    await interaction.reply(`Discord ID: ${guildUser.discordID}, user information could not be found.`);
+                    await safeReply(interaction, {
+                        content: `Discord ID: ${guildUser.discordID}, user information could not be found.`,
+                        ephemeral: true,
+                    });
                 } else {
-                    await interaction.reply(`User: ${user.tag}\nID: ${guildUser.discordID}`);
+                    await safeReply(interaction, {content: `User: ${user.tag}\nID: ${guildUser.discordID}`, ephemeral: true});
                 }
                 return;
             } else {
-                await interaction.reply(Strings.NO_USER);
+                await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
                 return;
             }
         } else {
@@ -60,10 +59,10 @@ export default class GetCommand implements Command {
             // Find user
             const guildUser = await GuildUser.findOne({where: {discordID: user.id}});
             if (guildUser) {
-                await interaction.reply(`https://scoresaber.com/u/${guildUser.scoreSaberID}`);
+                await safeReply(interaction, {content: `https://scoresaber.com/u/${guildUser.scoreSaberID}`, ephemeral: true});
                 return;
             } else {
-                await interaction.reply(Strings.NO_PROFILE);
+                await safeReply(interaction, {content: Strings.NO_PROFILE, ephemeral: true});
                 return;
             }
         }

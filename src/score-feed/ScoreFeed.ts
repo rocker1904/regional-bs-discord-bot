@@ -1,7 +1,8 @@
 import {RawData, WebSocket} from 'ws';
 import logger from '../util/logger';
 import config from '../config.json';
-import ScoreSaberAPI from 'scoresaber.js';
+import {SCORESABER_WS_URL, type LeaderboardScore} from 'scoresaber.js';
+import scoreSaber from '../util/scoreSaber';
 import Bot from '../Bot';
 import ScoreEmbed from './ScoreEmbed';
 import {WebSocketMessage} from '../types/WebSocketMessage';
@@ -39,10 +40,10 @@ export default class ScoreFeed {
     }
 
     private connect() {
-        this.ws = new WebSocket('wss://scoresaber.com/ws', {
+        this.ws = new WebSocket(SCORESABER_WS_URL, {
             headers: {'User-Agent': 'Regional BS Discord Bot'},
         });
-        this.ws.on('open', () => this.currentReconnectDelay = this.initialReconnectDelay);
+        this.ws.on('open', () => (this.currentReconnectDelay = this.initialReconnectDelay));
         this.ws.on('message', (message) => void this.onMessage(message));
         this.ws.on('error', (err) => logger.error('Score feed WS error: ', err));
         this.ws.on('close', () => {
@@ -54,7 +55,12 @@ export default class ScoreFeed {
     }
 
     private async onMessage(data: RawData) {
-        const messageString = data.toString();
+        // RawData is Buffer | ArrayBuffer | Buffer[]; normalise to text explicitly.
+        const messageString = Buffer.isBuffer(data)
+            ? data.toString()
+            : Array.isArray(data)
+              ? Buffer.concat(data).toString()
+              : Buffer.from(data).toString();
         if (messageString === 'Connected to the ScoreSaber WSS') {
             logger.info(messageString);
             return;
@@ -78,26 +84,42 @@ export default class ScoreFeed {
         const score = scoreMessage.commandData.score;
         const region = score.leaderboardPlayerInfo.country;
         const leaderboard = scoreMessage.commandData.leaderboard;
-        const guildConfigs = config.guildConfigs.filter(({scoreFeedConfig, scoreSaberRegions}) =>
-            scoreFeedConfig !== undefined &&
-            (leaderboard.ranked || scoreFeedConfig.allowUnrankedScores) &&
-            scoreSaberRegions.some((configRegion) => configRegion.toLowerCase() === region.toLowerCase()),
+        const guildConfigs = config.guildConfigs.filter(
+            ({scoreFeedConfig, scoreSaberRegions}) =>
+                scoreFeedConfig !== undefined &&
+                (leaderboard.ranked || scoreFeedConfig.allowUnrankedScores) &&
+                scoreSaberRegions.some((configRegion) => configRegion.toLowerCase() === region.toLowerCase()),
         );
 
+        // Guilds that share a region scope need identical leaderboard data for this
+        // score, so fetch each scope at most once per event (no cross-event cache —
+        // a stale list wouldn't contain this just-set score).
+        const scoresByScope = new Map<string, LeaderboardScore[]>();
         for (const {guildID, scoreFeedConfig, scoreSaberRegions} of guildConfigs) {
             if (!scoreFeedConfig) continue;
             const combinedRegions = scoreSaberRegions.join(',');
-            const regionalScoreCollection = await ScoreSaberAPI.fetchLeaderboardScores(leaderboard.id, 1, combinedRegions);
-            const regionalScores = regionalScoreCollection.scores;
+            let regionalScores = scoresByScope.get(combinedRegions);
+            if (!regionalScores) {
+                const collection = await scoreSaber.leaderboards.scoresPage(leaderboard.id, {
+                    page: 1,
+                    scope: combinedRegions,
+                    limit: 100,
+                });
+                regionalScores = collection.data;
+                scoresByScope.set(combinedRegions, regionalScores);
+            }
 
             // Setting the first scores on a map shouldn't count
             // if (scoreFeedConfig.positionRequirement >= regionalScores.length) return;
 
             const regionalPosition = regionalScores.findIndex((regionalScore) => regionalScore.id === score.id) + 1;
-            if (regionalPosition === 0 || regionalPosition > scoreFeedConfig.positionRequirement) return;
+            if (regionalPosition === 0 || regionalPosition > scoreFeedConfig.positionRequirement) continue;
 
+            // Build the embed from the canonical leaderboard score (richer + already
+            // has accuracy/pp), keeping the map metadata from the WS payload.
+            const matchedScore = regionalScores[regionalPosition - 1];
             const scoreFeedChannel = Bot.scoreFeedChannels[guildID];
-            const embed = new ScoreEmbed(score, leaderboard, regionalPosition, combinedRegions);
+            const embed = new ScoreEmbed(matchedScore, leaderboard, regionalPosition, combinedRegions);
             await scoreFeedChannel.send({embeds: [embed]});
         }
     }

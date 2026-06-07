@@ -1,41 +1,47 @@
 {
-  "name": "regional-bs-discord-bot",
-  "version": "1.1.1",
-  "description": "",
-  "main": "Bot.ts",
-  "scripts": {
-    "build": "rimraf ./build && tsc",
-    "start": "npm run build && node -r dotenv/config --trace-warnings build/Bot.js",
-    "lint": "eslint . --ext .ts",
-    "deploy-commands": "npm run build && node -r dotenv/config build/util/deployCommands.js"
-  },
-  "author": "Rocker1904",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^24.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^8.47.0",
-    "eslint-config-google": "^0.14.0",
-    "rimraf": "^6.0.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
-  },
-  "dependencies": {
-    "@discordjs/rest": "^2.0.1",
-    "axios": "^1.4.0",
-    "axios-retry": "^4.0.0",
-    "bufferutil": "^4.0.7",
-    "discord-api-types": "^0.38.0",
-    "discord.js": "^14.13.0",
-    "dotenv": "^17.0.0",
-    "erlpack": "github:discord/erlpack",
-    "pg": "^8.21.0",
-    "reflect-metadata": "^0.2.0",
-    "scoresaber.js": "^0.4.0",
-    "typeorm": "^0.3.17",
-    "utf-8-validate": "^6.0.3",
-    "winston": "^3.10.0",
-    "zlib-sync": "^0.1.8"
-  }
+    "name": "regional-bs-discord-bot",
+    "version": "1.1.1",
+    "description": "",
+    "main": "Bot.ts",
+    "scripts": {
+        "build": "rimraf ./build && tsc",
+        "start": "npm run build && node -r dotenv/config --trace-warnings build/Bot.js",
+        "dev": "tsx watch -r dotenv/config ./src/Bot.ts",
+        "lint": "eslint .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "typecheck": "tsc -p tsconfig.test.json",
+        "test": "tsx --test test/*.test.ts",
+        "test:coverage": "c8 tsx --test test/*.test.ts",
+        "deploy-commands": "npm run build && node -r dotenv/config build/util/deployCommands.js"
+    },
+    "author": "Rocker1904",
+    "license": "MIT",
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^24.0.0",
+        "c8": "^11.0.0",
+        "eslint": "^10.4.1",
+        "eslint-config-prettier": "^10.1.8",
+        "prettier": "^3.8.3",
+        "rimraf": "^6.0.0",
+        "tsx": "^4.22.4",
+        "typescript": "^5.1.6",
+        "typescript-eslint": "^8.60.1"
+    },
+    "dependencies": {
+        "@discordjs/rest": "^2.0.1",
+        "bufferutil": "^4.0.7",
+        "discord-api-types": "^0.38.0",
+        "discord.js": "^14.13.0",
+        "dotenv": "^17.0.0",
+        "erlpack": "github:discord/erlpack",
+        "pg": "^8.21.0",
+        "reflect-metadata": "^0.2.0",
+        "scoresaber.js": "^1.0.0",
+        "typeorm": "^0.3.17",
+        "utf-8-validate": "^6.0.3",
+        "winston": "^3.10.0",
+        "zlib-sync": "^0.1.8"
+    }
 }

@@ -1,5 +1,7 @@
 import {APIEmbed, APIEmbedField, APIEmbedFooter, APIEmbedThumbnail} from 'discord.js';
-import {LeaderboardInfo, Score} from 'scoresaber.js';
+import {LeaderboardScore} from 'scoresaber.js';
+import {WebSocketLeaderboard} from '../types/WebSocketScoreMessage';
+import {formatAccuracy, parseDifficulty} from '../util/formatScore';
 
 export default class ScoreEmbed implements APIEmbed {
     title: string;
@@ -11,14 +13,14 @@ export default class ScoreEmbed implements APIEmbed {
     thumbnail: APIEmbedThumbnail;
     fields: APIEmbedField[];
 
-    constructor(score: Score, leaderboard: LeaderboardInfo, regionalPosition: number, scoreSaberRegion: string) {
-        this.title = `${score.leaderboardPlayerInfo!.name} set a #${regionalPosition} ${scoreSaberRegion.toUpperCase()} Score`;
-        this.description = `Map - ${leaderboard.songName} (${leaderboard.difficulty.difficultyRaw.split('_')[1].replace('Plus', '+')}) [[Map Link]](https://scoresaber.com/leaderboard/${leaderboard.id})`;
-        this.color = 0x00FFFF;
+    constructor(score: LeaderboardScore, leaderboard: WebSocketLeaderboard, regionalPosition: number, scoreSaberRegion: string) {
+        this.title = `${score.player.name} set a #${regionalPosition} ${scoreSaberRegion.toUpperCase()} Score`;
+        this.description = `Map - ${leaderboard.songName} (${parseDifficulty(leaderboard.difficulty.difficultyRaw)}) [[Map Link]](https://scoresaber.com/leaderboard/${leaderboard.id})`;
+        this.color = 0x00ffff;
         this.fields = [
             {
                 name: `Accuracy`,
-                value: `${Math.round((score.baseScore / leaderboard.maxScore) * 10000) / 100}%`,
+                value: formatAccuracy(score.accuracy),
                 inline: true,
             },
             {
@@ -43,19 +45,19 @@ export default class ScoreEmbed implements APIEmbed {
             },
             {
                 name: `Max Combo`,
-                value: `${score.maxCombo} ${(score.fullCombo ? '(FC)' : '')}`,
+                value: `${score.maxCombo} ${score.fullCombo ? '(FC)' : ''}`,
                 inline: true,
             },
         ];
         this.timestamp = `${new Date().toISOString()}`;
         this.thumbnail = {
-            'url': `${leaderboard.coverImage}`,
-            'height': 256,
-            'width': 256,
+            url: `${leaderboard.coverImage}`,
+            height: 256,
+            width: 256,
         };
         this.footer = {
             text: `Your Time Zone`,
         };
-        this.url = `https://scoresaber.com/u/${score.leaderboardPlayerInfo!.id}`;
+        this.url = `https://scoresaber.com/u/${score.player.id}`;
     }
 }

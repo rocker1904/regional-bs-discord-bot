@@ -1,8 +1,11 @@
-import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
+import {CommandInteraction, EmbedBuilder, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
-import ScoresaberAPI from 'scoresaber.js';
+import rankNeighbours from '../util/rankNeighbours';
+import scoreSaber from '../util/scoreSaber';
+import safeReply from '../util/safeReply';
+import countryFlag from '../util/countryFlag';
 import logger from '../util/logger';
 
 export default class AmrCommand implements Command {
@@ -15,36 +18,37 @@ export default class AmrCommand implements Command {
         const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}});
 
         if (!guildUser) {
-            await interaction.reply(Strings.NO_USER);
+            await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
             return;
         }
 
-        // Get data for profiles around the user
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID);
-        const playerBelow = await ScoresaberAPI.fetchPlayerByRank(player.countryRank + 1, player.country).catch((err) => {
+        // Get data for profiles around the user (both neighbours in one request)
+        const player = await scoreSaber.players.getBasic(guildUser.scoreSaberID);
+        const {above: playerAbove, below: playerBelow} = await rankNeighbours(player.stats.countryRank, {
+            countries: player.country,
+        }).catch(async (err) => {
             logger.error('amr command failed.');
             logger.error(err);
-            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+            await safeReply(interaction, {content: 'Command failed. Error fetching data from ScoreSaber', ephemeral: true});
+            return {above: undefined, below: undefined};
         });
         if (!playerBelow) return;
 
-        if (player.rank === 1) {
-            await interaction.reply(`You are ${(player.pp - playerBelow.pp).toFixed(2)}PP above ${playerBelow.name}`);
-            return;
+        let description: string;
+        if (player.stats.countryRank === 1) {
+            description = `You're ${player.country} #1! 🥇 ${(player.stats.totalPP - playerBelow.stats.totalPP).toFixed(2)}PP above **${playerBelow.name}**.`;
+        } else {
+            if (!playerAbove) return;
+            description = `#${playerAbove.stats.countryRank} **${playerAbove.name}** has ${(playerAbove.stats.totalPP - player.stats.totalPP).toFixed(2)} more PP than you.
+#${player.stats.countryRank} **You (${player.name})** have ${player.stats.totalPP}PP.
+#${playerBelow.stats.countryRank} **${playerBelow.name}** has ${(player.stats.totalPP - playerBelow.stats.totalPP).toFixed(2)} less PP than you.`;
         }
 
-        const playerAbove = await ScoresaberAPI.fetchPlayerByRank(player.countryRank - 1, player.country).catch((err) => {
-            logger.error('amr command failed.');
-            logger.error(err);
-            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
-        });
-        if (!playerAbove) return;
-
-        const reply = `__**${player.country} ranks around you:**__
-#${playerAbove.countryRank} **${playerAbove.name}** has ${(playerAbove.pp - player.pp).toFixed(2)} more PP than you.
-#${player.countryRank} **You (${player.name})** have ${player.pp}PP.
-#${playerBelow.countryRank} **${playerBelow.name}** has ${(player.pp - playerBelow.pp).toFixed(2)} less PP than you.`;
-
-        await interaction.reply(reply);
+        const embed = new EmbedBuilder()
+            .setColor(0x00ffff)
+            .setTitle(`${countryFlag(player.country)} ${player.country} ranks around you`.trim())
+            .setThumbnail(player.avatar)
+            .setDescription(description);
+        await safeReply(interaction, {embeds: [embed]});
     }
 }

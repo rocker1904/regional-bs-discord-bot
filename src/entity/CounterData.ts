@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 import {BaseEntity, Column, Entity, PrimaryColumn} from 'typeorm';
 
 // Storing the counter by name allows for easy expansion to multiple counters later

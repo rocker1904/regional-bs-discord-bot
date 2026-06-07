@@ -2,17 +2,14 @@ import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
+import safeReply from '../util/safeReply';
 
 export default class RemoveUserCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
         .setName('remove-user')
         .setDescription('Removes a user from the database.')
         .setDefaultMemberPermissions(0)
-        .addUserOption((option) =>
-            option.setName('user')
-                .setDescription('User to remove')
-                .setRequired(true),
-        );
+        .addUserOption((option) => option.setName('user').setDescription('User to remove').setRequired(true));
 
     public async execute(interaction: CommandInteraction) {
         if (!interaction.isChatInputCommand()) return;
@@ -20,12 +17,11 @@ export default class RemoveUserCommand implements Command {
 
         const guildUser = await GuildUser.findOne({where: {discordID: user.id}});
         if (!guildUser) {
-            await interaction.reply(Strings.NO_USER);
+            await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
             return;
         }
 
         await guildUser.remove();
-        await interaction.reply(Strings.USER_REMOVAL_SUCCESS);
+        await safeReply(interaction, Strings.USER_REMOVAL_SUCCESS);
     }
 }
-

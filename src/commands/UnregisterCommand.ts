@@ -2,11 +2,10 @@ import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
+import safeReply from '../util/safeReply';
 
 export default class UnregisterCommand implements Command {
-    public slashCommandBuilder = new SlashCommandBuilder()
-        .setName('unregister')
-        .setDescription('Unregister from the bot');
+    public slashCommandBuilder = new SlashCommandBuilder().setName('unregister').setDescription('Unregister from the bot');
 
     public async execute(interaction: CommandInteraction) {
         const user = interaction.user;
@@ -15,10 +14,10 @@ export default class UnregisterCommand implements Command {
         const guildUser = await GuildUser.findOne({where: {discordID: user.id}});
         if (guildUser) {
             await guildUser.remove();
-            await interaction.reply(Strings.USER_REMOVAL_SUCCESS);
+            await safeReply(interaction, Strings.USER_REMOVAL_SUCCESS);
             return;
         } else {
-            await interaction.reply(Strings.NO_USER);
+            await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
             return;
         }
     }

@@ -1,6 +1,7 @@
 import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
 import Bot from '../Bot';
 import Command from './Command';
+import safeReply from '../util/safeReply';
 
 export default class RoleUpdateCommand implements Command {
     public slashCommandBuilder = new SlashCommandBuilder()
@@ -9,7 +10,13 @@ export default class RoleUpdateCommand implements Command {
         .setDefaultMemberPermissions(0);
 
     public async execute(interaction: CommandInteraction) {
-        void Bot.roleUpdater.main();
-        await interaction.reply('Running update.');
+        // The run can take a while; the dispatcher auto-defers past 2s. Awaiting it
+        // means errors surface and we can report the outcome (the guard returns false
+        // if a run — e.g. the interval — is already in progress).
+        const ran = await Bot.roleUpdater.main();
+        await safeReply(interaction, {
+            content: ran ? 'Role update complete.' : 'A role update is already running — try again shortly.',
+            ephemeral: true,
+        });
     }
 }

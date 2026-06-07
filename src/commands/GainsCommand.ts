@@ -1,8 +1,10 @@
-import {CommandInteraction, SlashCommandBuilder} from 'discord.js';
+import {CommandInteraction, EmbedBuilder, SlashCommandBuilder} from 'discord.js';
 import {GuildUser} from '../entity/GuildUser';
 import Strings from '../util/Strings';
 import Command from './Command';
-import ScoresaberAPI from 'scoresaber.js';
+import scoreSaber from '../util/scoreSaber';
+import safeReply from '../util/safeReply';
+import dateDiff from '../util/dateDiff';
 import {GainsCommandData} from '../entity/GainsCommandData';
 import logger from '../util/logger';
 
@@ -15,68 +17,65 @@ export default class GainsCommand implements Command {
         // Fetch user from db
         const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}, relations: ['gainsData']});
         if (!guildUser) {
-            await interaction.reply(Strings.NO_USER);
+            await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
             return;
         }
 
-        // Get the user's Scoresaber
-        const player = await ScoresaberAPI.fetchBasicPlayer(guildUser.scoreSaberID).catch((err) => {
+        // Get the user's ScoreSaber
+        const player = await scoreSaber.players.getBasic(guildUser.scoreSaberID).catch((err) => {
             logger.error('Gains command failed. Error fetching player.');
             logger.error(err);
-            void interaction.reply('Command failed. Error fetching data from ScoreSaber');
+            void safeReply(interaction, {content: 'Command failed. Error fetching data from ScoreSaber', ephemeral: true});
         });
         if (!player) return;
         const gainsData = guildUser.gainsData;
 
         if (!gainsData) {
             const newGainsData = new GainsCommandData();
-            newGainsData.globalRank = player.rank;
+            newGainsData.globalRank = player.stats.rank;
             newGainsData.time = new Date();
-            newGainsData.pp = player.pp;
+            newGainsData.pp = player.stats.totalPP;
             await newGainsData.save();
             guildUser.gainsData = newGainsData;
             await guildUser.save();
+            await safeReply(interaction, {
+                content: 'Baseline recorded! Run `/gains` again later to see your PP and rank change.',
+                ephemeral: true,
+            });
             return;
         } else {
             // Get the change
-            const globalRankChange = Math.abs(player.rank - gainsData.globalRank);
-            const ppChange = Math.abs(player.pp - gainsData.pp);
+            const globalRankChange = Math.abs(player.stats.rank - gainsData.globalRank);
+            const ppChange = Math.abs(player.stats.totalPP - gainsData.pp);
 
-            let reply = '';
-            if (player.pp > gainsData.pp) {
-                reply += `You **gained ${ppChange.toFixed(2)}PP** in the last ${this.dateDiff(gainsData.time)}`;
-            } else if (gainsData.pp > player.pp) {
-                reply += `You **lost ${ppChange.toFixed(2)}PP** in the last ${this.dateDiff(gainsData.time)}`;
+            let description = '';
+            let color = 0x99aab5; // grey: no PP change
+            if (player.stats.totalPP > gainsData.pp) {
+                description += `You **gained ${ppChange.toFixed(2)}PP** in the last ${dateDiff(gainsData.time)}`;
+                color = 0x57f287; // green
+            } else if (gainsData.pp > player.stats.totalPP) {
+                description += `You **lost ${ppChange.toFixed(2)}PP** in the last ${dateDiff(gainsData.time)}`;
+                color = 0xed4245; // red
             } else {
-                reply += `Your PP has **stayed the same** in the last ${this.dateDiff(gainsData.time)}`;
+                description += `Your PP has **stayed the same** in the last ${dateDiff(gainsData.time)}`;
             }
 
-            if (player.rank > gainsData.globalRank) {
-                reply += ` (and **lost ${globalRankChange}** ranks)`;
-            } else if (player.rank < gainsData.globalRank) {
-                reply += ` (and **gained ${globalRankChange}** ranks)`;
+            if (player.stats.rank > gainsData.globalRank) {
+                description += ` (and **lost ${globalRankChange}** ranks)`;
+            } else if (player.stats.rank < gainsData.globalRank) {
+                description += ` (and **gained ${globalRankChange}** ranks)`;
             } else {
-                reply += ` (and **stayed the same** rank)`;
+                description += ` (and **stayed the same** rank)`;
             }
 
-            await interaction.reply(reply);
+            const embed = new EmbedBuilder().setColor(color).setTitle('Your gains').setThumbnail(player.avatar).setDescription(description);
+            await safeReply(interaction, {embeds: [embed]});
 
             // Update Gains Data
-            gainsData.globalRank = player.rank;
+            gainsData.globalRank = player.stats.rank;
             gainsData.time = new Date();
-            gainsData.pp = player.pp;
+            gainsData.pp = player.stats.totalPP;
             await gainsData.save();
-        }
-    }
-
-    // Helper function for calculating date difference
-    public dateDiff(date: Date): string {
-        const diff = Math.abs(new Date().getTime() - date.getTime());
-        const days = Math.ceil(diff / (1000 * 3600 * 24));
-        if (days > 1) {
-            return `${days} days`;
-        } else {
-            return 'day';
         }
     }
 }

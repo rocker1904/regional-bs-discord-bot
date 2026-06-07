@@ -108,3 +108,6 @@ dist
 
 # Output files
 build
+# Compiled test output (tests are run from .ts via tsx)
+test/**/*.js
+test/**/*.js.map

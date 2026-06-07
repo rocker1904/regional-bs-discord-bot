@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 import {BaseEntity, Column, Entity, JoinColumn, OneToOne, PrimaryColumn} from 'typeorm';
 import {GainsCommandData} from './GainsCommandData';
 

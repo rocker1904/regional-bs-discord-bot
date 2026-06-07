@@ -9,23 +9,23 @@ export default async function onReady(): Promise<void> {
     for (const guildConfig of config.guildConfigs) {
         const guild = await Bot.client.guilds.fetch(guildConfig.guildID);
         if (!guild) {
-            console.error(`Couldn't fetch guild ${guildConfig.guildID}.`);
-            return;
+            logger.error(`Couldn't fetch guild ${guildConfig.guildID}.`);
+            continue;
         }
         Bot.guilds[guildConfig.guildID] = guild;
 
         const logChannel = await guild.channels.fetch(guildConfig.logChannelID);
         if (!logChannel || logChannel.type !== ChannelType.GuildText) {
-            console.error(`Log channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
-            return;
+            logger.error(`Log channel doesn't exist or is not a text channel for guild ${guild.name}.`);
+            continue;
         }
         Bot.logChannels[guildConfig.guildID] = logChannel;
 
         if (guildConfig.rankupFeedChannelID) {
             const rankupFeedChannel = await guild.channels.fetch(guildConfig.rankupFeedChannelID);
             if (!rankupFeedChannel || rankupFeedChannel.type !== ChannelType.GuildText) {
-                console.error(`Rankup channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
-                return;
+                logger.error(`Rankup channel doesn't exist or is not a text channel for guild ${guild.name}.`);
+                continue;
             }
             Bot.rankupFeedChannels[guildConfig.guildID] = rankupFeedChannel;
         }
@@ -33,16 +33,20 @@ export default async function onReady(): Promise<void> {
         if (guildConfig.scoreFeedConfig?.channelID) {
             const scoreFeedChannel = await guild.channels.fetch(guildConfig.scoreFeedConfig?.channelID);
             if (!scoreFeedChannel || scoreFeedChannel.type !== ChannelType.GuildText) {
-                console.error(`Score feed channel doesn\'t exist or is not a text channel for guild ${guild.name}.`);
-                return;
+                logger.error(`Score feed channel doesn't exist or is not a text channel for guild ${guild.name}.`);
+                continue;
             }
             Bot.scoreFeedChannels[guildConfig.guildID] = scoreFeedChannel;
         }
 
         Bot.staffIDs[guildConfig.guildID] = guildConfig.staffID; // Todo: Validation of role
 
-        await guild.members.fetch(); // Get and cache server members
-        logger.info(`${guild.name} set up! Member count: ${guild.members.cache.size}.`);
+        // Members are fetched/cached by RoleUpdater on its first run (constructed below).
+        logger.info(`${guild.name} set up!`);
+    }
+
+    if (Object.keys(Bot.guilds).length === 0) {
+        logger.error('No guilds were initialised — check the guild/channel IDs in config.json.');
     }
 
     Bot.roleUpdater = new RoleUpdater();

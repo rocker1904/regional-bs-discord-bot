@@ -23,9 +23,9 @@ const logger = winston.createLogger({
             format: 'YYYY-MM-DD HH:mm:ss',
         }),
         winston.format.errors({stack: true}),
-        winston.format.printf((info) =>
-            `${info.timestamp as string} ${info.level}: ${info.message as string}` +
-            (info.stack ? `\n${info.stack as string}` : ''),
+        winston.format.printf(
+            (info) =>
+                `${info.timestamp as string} ${info.level}: ${info.message as string}` + (info.stack ? `\n${info.stack as string}` : ''),
         ),
     ),
     transports: [

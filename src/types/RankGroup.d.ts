@@ -1,4 +1,4 @@
 interface RankGroup {
-    roleID: string,
-    rank: number,
+    roleID: string;
+    rank: number;
 }

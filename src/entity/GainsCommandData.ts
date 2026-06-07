@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 import {BaseEntity, Column, Entity, OneToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {GuildUser} from './GuildUser';
 
@@ -17,5 +16,5 @@ export class GainsCommandData extends BaseEntity {
     public pp!: number;
 
     @OneToOne(() => GuildUser, (guildUser) => guildUser.gainsData)
-        guildUser!: GuildUser | undefined;
+    guildUser!: GuildUser | undefined;
 }

@@ -36,12 +36,14 @@ async function main() {
         entities: [GuildUser, GainsCommandData, CounterData],
         synchronize: false,
     });
-    Bot.dataSource.initialize().catch((error) => {
+    try {
+        await Bot.dataSource.initialize();
+        logger.info('Connected to database.');
+    } catch (error) {
         logger.error('Failed to connect to database');
         logger.error(error);
-        process.exit();
-    });
-    logger.info('Connected to database.');
+        process.exit(1);
+    }
 
     const intents = new IntentsBitField();
     intents.add(
@@ -52,9 +54,9 @@ async function main() {
     );
 
     Bot.client = new Client({intents});
-    Bot.client.on('guildMemberAdd', onGuildMemberAdd);
-    Bot.client.on('interactionCreate', onInteraction);
-    Bot.client.once('ready', onReady);
+    Bot.client.on('guildMemberAdd', (member) => void onGuildMemberAdd(member));
+    Bot.client.on('interactionCreate', (interaction) => void onInteraction(interaction));
+    Bot.client.once('ready', () => void onReady());
 
     await deployCommands();
     await Bot.client.login(process.env.BOT_TOKEN); // Login errors not caught, we want to crash if we can't log in
