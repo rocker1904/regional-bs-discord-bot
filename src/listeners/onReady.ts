@@ -4,6 +4,7 @@ import RoleUpdater from '../RoleUpdater';
 import logger from '../util/logger';
 import config from '../config';
 import ScoreFeed from '../score-feed/ScoreFeed';
+import ProgressReport from '../progress-report/ProgressReport';
 
 export default async function onReady(): Promise<void> {
     for (const guildConfig of config.guildConfigs) {
@@ -39,6 +40,15 @@ export default async function onReady(): Promise<void> {
             Bot.scoreFeedChannels[guildConfig.guildID] = scoreFeedChannel;
         }
 
+        if (guildConfig.progressReportConfig?.channelID) {
+            const progressReportChannel = await guild.channels.fetch(guildConfig.progressReportConfig.channelID);
+            if (!progressReportChannel || progressReportChannel.type !== ChannelType.GuildText) {
+                logger.error(`Progress report channel doesn't exist or is not a text channel for guild ${guild.name}.`);
+                continue;
+            }
+            Bot.progressReportChannels[guildConfig.guildID] = progressReportChannel;
+        }
+
         Bot.staffIDs[guildConfig.guildID] = guildConfig.staffID; // Todo: Validation of role
 
         // Members are fetched/cached by RoleUpdater on its first run (constructed below).
@@ -51,6 +61,8 @@ export default async function onReady(): Promise<void> {
 
     Bot.roleUpdater = new RoleUpdater();
     Bot.scoreFeed = new ScoreFeed();
+    Bot.progressReport = new ProgressReport();
+    Bot.progressReport.start();
 
     logger.info(`Ready! User count: ${Bot.client.users.cache.size}.`);
 }

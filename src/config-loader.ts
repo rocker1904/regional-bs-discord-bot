@@ -7,12 +7,18 @@ export interface ScoreFeedConfig {
     allowUnrankedScores: boolean;
 }
 
+export interface ProgressReportConfig {
+    channelID: string;
+    maxRegionRank: number;
+}
+
 export interface GuildConfig {
     guildID: string;
     staffID: string;
     logChannelID: string;
     rankupFeedChannelID: string;
     scoreFeedConfig?: ScoreFeedConfig;
+    progressReportConfig?: ProgressReportConfig;
     regionRankGroups: RankGroup[]; // RankGroup is the ambient type from src/types/RankGroup.d.ts
     globalRankGroups: RankGroup[];
     scoreSaberRegions: string[];
@@ -92,6 +98,14 @@ function parseScoreFeedConfig(v: unknown, path: string): ScoreFeedConfig {
     };
 }
 
+function parseProgressReportConfig(v: unknown, path: string): ProgressReportConfig {
+    const o = asObject(v, path);
+    return {
+        channelID: asString(o.channelID, `${path}.channelID`),
+        maxRegionRank: asPositiveNumber(o.maxRegionRank, `${path}.maxRegionRank`),
+    };
+}
+
 function parseGuildConfig(v: unknown, path: string): GuildConfig {
     const o = asObject(v, path);
     return {
@@ -100,6 +114,8 @@ function parseGuildConfig(v: unknown, path: string): GuildConfig {
         logChannelID: asString(o.logChannelID, `${path}.logChannelID`),
         rankupFeedChannelID: optionalString(o.rankupFeedChannelID, `${path}.rankupFeedChannelID`, ''),
         scoreFeedConfig: o.scoreFeedConfig === undefined ? undefined : parseScoreFeedConfig(o.scoreFeedConfig, `${path}.scoreFeedConfig`),
+        progressReportConfig:
+            o.progressReportConfig === undefined ? undefined : parseProgressReportConfig(o.progressReportConfig, `${path}.progressReportConfig`),
         regionRankGroups: asArray(o.regionRankGroups, `${path}.regionRankGroups`).map((g, i) =>
             parseRankGroup(g, `${path}.regionRankGroups[${i}]`),
         ),

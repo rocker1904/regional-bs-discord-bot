@@ -4,7 +4,7 @@
     "description": "",
     "main": "Bot.ts",
     "scripts": {
-        "build": "rimraf ./build && tsc",
+        "build": "rimraf ./build && tsc && node -e \"require('fs').cpSync('src/progress-report/assets','build/progress-report/assets',{recursive:true})\"",
         "start": "npm run build && node -r dotenv/config --trace-warnings build/Bot.js",
         "dev": "tsx watch -r dotenv/config ./src/Bot.ts",
         "lint": "eslint .",
@@ -31,6 +31,7 @@
     },
     "dependencies": {
         "@discordjs/rest": "^2.0.1",
+        "@napi-rs/canvas": "^1.0.0",
         "bufferutil": "^4.0.7",
         "discord-api-types": "^0.38.0",
         "discord.js": "^14.13.0",

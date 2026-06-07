@@ -112,3 +112,25 @@ test('rankupFeedChannelID and scoreFeedConfig are optional', () => {
     assert.equal(cfg.guildConfigs[0].rankupFeedChannelID, '');
     assert.equal(cfg.guildConfigs[0].scoreFeedConfig, undefined);
 });
+
+test('parses an optional progressReportConfig', () => {
+    const withPr = structuredClone(valid) as Record<string, unknown>;
+    (withPr.guildConfigs as Record<string, unknown>[])[0].progressReportConfig = {channelID: 'c', maxRegionRank: 100};
+    const cfg = loadConfig(writeConfig(JSON.stringify(withPr)));
+    assert.equal(cfg.guildConfigs[0].progressReportConfig?.channelID, 'c');
+    assert.equal(cfg.guildConfigs[0].progressReportConfig?.maxRegionRank, 100);
+});
+
+test('progressReportConfig is optional (absent is fine)', () => {
+    const cfg = loadConfig(writeConfig(JSON.stringify(valid)));
+    assert.equal(cfg.guildConfigs[0].progressReportConfig, undefined);
+});
+
+test('progressReportConfig.maxRegionRank must be positive', () => {
+    const bad = structuredClone(valid) as Record<string, unknown>;
+    (bad.guildConfigs as Record<string, unknown>[])[0].progressReportConfig = {channelID: 'c', maxRegionRank: 0};
+    assert.throws(
+        () => loadConfig(writeConfig(JSON.stringify(bad))),
+        (e: unknown) => e instanceof ConfigError && /progressReportConfig\.maxRegionRank/.test(e.message) && /positive/.test(e.message),
+    );
+});
