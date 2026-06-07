@@ -1,0 +1,20 @@
+{
+    "rankUpdateInterval": 10,
+    "guildConfigs": [
+        {
+            "guildID": "REPLACE_DISCORD_GUILD_ID",
+            "staffID": "REPLACE_STAFF_ROLE_ID",
+            "logChannelID": "REPLACE_LOG_CHANNEL_ID",
+            "rankupFeedChannelID": "",
+            "scoreFeedConfig": {
+                "channelID": "",
+                "positionRequirement": 10,
+                "allowUnrankedScores": false
+            },
+            "regionRankGroups": [{"roleID": "REPLACE_ROLE_ID", "rank": 1}],
+            "globalRankGroups": [{"roleID": "REPLACE_ROLE_ID", "rank": 50}],
+            "scoreSaberRegions": ["gb"],
+            "roleMap": {"gb": "REPLACE_ROLE_ID", "": "REPLACE_DEFAULT_ROLE_ID"}
+        }
+    ]
+}

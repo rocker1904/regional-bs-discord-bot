@@ -4,7 +4,7 @@ import scoreSaber from './util/scoreSaber';
 import selectRankGroup from './util/selectRankGroup';
 import RankUpEmbed from './RankUpEmbed';
 import Bot from './Bot';
-import {rankUpdateInterval, guildConfigs} from './config.json';
+import {rankUpdateInterval, guildConfigs} from './config';
 import {GuildUser} from './entity/GuildUser';
 import logger from './util/logger';
 

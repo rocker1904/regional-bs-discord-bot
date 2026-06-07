@@ -1,6 +1,6 @@
 import {RawData, WebSocket} from 'ws';
 import logger from '../util/logger';
-import config from '../config.json';
+import config from '../config';
 import {SCORESABER_WS_URL, type LeaderboardScore} from 'scoresaber.js';
 import scoreSaber from '../util/scoreSaber';
 import userAgent from '../util/userAgent';

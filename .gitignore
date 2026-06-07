@@ -111,3 +111,12 @@ build
 # Compiled test output (tests are run from .ts via tsx)
 test/**/*.js
 test/**/*.js.map
+
+# Per-deployment guild config (lives at CONFIG_PATH, outside the repo).
+# config.example.json is the tracked template.
+config.json
+/src/config.json
+
+# Design docs / implementation plans (specs, brainstorming, plans) — scratch space,
+# not committed. (scoresaber.js ignores /docs/ for the same reason.)
+/docs/
