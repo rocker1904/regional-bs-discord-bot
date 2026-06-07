@@ -5,9 +5,9 @@
     "main": "Bot.ts",
     "scripts": {
         "build": "rimraf ./build && tsc && node -e \"require('fs').cpSync('src/progress-report/assets','build/progress-report/assets',{recursive:true})\"",
-        "start": "npm run build && node -r dotenv/config --trace-warnings build/Bot.js",
-        "migrate": "node -r dotenv/config build/migrate.js",
-        "dev": "tsx watch -r dotenv/config ./src/Bot.ts",
+        "start": "npm run build && node --env-file-if-exists=.env --trace-warnings build/Bot.js",
+        "migrate": "node --env-file-if-exists=.env build/migrate.js",
+        "dev": "tsx watch --env-file-if-exists=.env ./src/Bot.ts",
         "lint": "eslint .",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
@@ -16,7 +16,7 @@
         "test:coverage": "c8 tsx --test test/*.test.ts",
         "pre-commit": "npm run format && npm run lint && npm run typecheck && npm run build && npm test",
         "prepare": "git config core.hooksPath .githooks || true",
-        "deploy-commands": "npm run build && node -r dotenv/config build/util/deployCommands.js"
+        "deploy-commands": "npm run build && node --env-file-if-exists=.env build/util/deployCommands.js"
     },
     "author": "Rocker1904",
     "license": "MIT",
@@ -24,6 +24,7 @@
         "@eslint/js": "^10.0.1",
         "@types/node": "^24.0.0",
         "@types/pg": "^8.20.0",
+        "@types/ws": "^8.18.1",
         "c8": "^11.0.0",
         "eslint": "^10.4.1",
         "eslint-config-prettier": "^10.1.8",
@@ -39,7 +40,6 @@
         "bufferutil": "^4.0.7",
         "discord-api-types": "^0.38.0",
         "discord.js": "^14.13.0",
-        "dotenv": "^17.0.0",
         "erlpack": "github:discord/erlpack",
         "pg": "^8.21.0",
         "reflect-metadata": "^0.2.0",
@@ -47,6 +47,7 @@
         "typeorm": "^0.3.17",
         "utf-8-validate": "^6.0.3",
         "winston": "^3.10.0",
+        "ws": "^8.21.0",
         "zlib-sync": "^0.1.8"
     }
 }
