@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+# Format the tree and run all checks before allowing a commit.
+# Skip with `git commit --no-verify` (e.g. for WIP commits).
+set -e
+
+# Remember what was staged so we can re-stage files that `format` rewrites,
+# without sweeping in unrelated unstaged changes (keeps partial commits partial;
+# a partially-staged file that gets reformatted will be fully staged — rare).
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+npm run pre-commit
+
+[ -n "$staged" ] && printf '%s\n' "$staged" | tr '\n' '\0' | xargs -0 --no-run-if-empty git add --
+exit 0
