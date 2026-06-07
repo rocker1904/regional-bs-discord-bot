@@ -14,6 +14,8 @@
         "typecheck": "tsc -p tsconfig.test.json",
         "test": "tsx --test test/*.test.ts",
         "test:coverage": "c8 tsx --test test/*.test.ts",
+        "pre-commit": "npm run format && npm run lint && npm run typecheck && npm run build && npm test",
+        "prepare": "git config core.hooksPath .githooks || true",
         "deploy-commands": "npm run build && node -r dotenv/config build/util/deployCommands.js"
     },
     "author": "Rocker1904",
