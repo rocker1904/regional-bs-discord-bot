@@ -39,7 +39,7 @@
         "@napi-rs/canvas": "^1.0.0",
         "bufferutil": "^4.0.7",
         "discord-api-types": "^0.38.0",
-        "discord.js": "^14.13.0",
+        "discord.js": "^14.26.4",
         "erlpack": "github:discord/erlpack",
         "pg": "^8.21.0",
         "reflect-metadata": "^0.2.0",
