@@ -3,6 +3,7 @@ import logger from '../util/logger';
 import config from '../config.json';
 import {SCORESABER_WS_URL, type LeaderboardScore} from 'scoresaber.js';
 import scoreSaber from '../util/scoreSaber';
+import userAgent from '../util/userAgent';
 import Bot from '../Bot';
 import ScoreEmbed from './ScoreEmbed';
 import {WebSocketMessage} from '../types/WebSocketMessage';
@@ -41,7 +42,7 @@ export default class ScoreFeed {
 
     private connect() {
         this.ws = new WebSocket(SCORESABER_WS_URL, {
-            headers: {'User-Agent': 'Regional BS Discord Bot'},
+            headers: {'User-Agent': userAgent},
         });
         this.ws.on('open', () => (this.currentReconnectDelay = this.initialReconnectDelay));
         this.ws.on('message', (message) => void this.onMessage(message));

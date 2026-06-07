@@ -1,4 +1,5 @@
 import {ScoreSaberClient} from 'scoresaber.js';
+import userAgent from './userAgent';
 
 /**
  * Single shared ScoreSaber client for the whole bot.
@@ -8,6 +9,6 @@ import {ScoreSaberClient} from 'scoresaber.js';
  * would track the limit independently and they could collectively overshoot the
  * API's buckets.
  */
-const scoreSaber = new ScoreSaberClient();
+const scoreSaber = new ScoreSaberClient({userAgent});
 
 export default scoreSaber;
