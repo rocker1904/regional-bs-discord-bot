@@ -15,7 +15,7 @@ export default class GainsCommand implements Command {
 
     public async execute(interaction: CommandInteraction) {
         // Fetch user from db
-        const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}, relations: ['gainsData']});
+        const guildUser = await GuildUser.findOne({where: {discordID: interaction.user.id}, relations: {gainsData: true}});
         if (!guildUser) {
             await safeReply(interaction, {content: Strings.NO_USER, ephemeral: true});
             return;
