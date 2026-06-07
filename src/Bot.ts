@@ -60,7 +60,7 @@ async function main() {
     Bot.client = new Client({intents});
     Bot.client.on('guildMemberAdd', (member) => void onGuildMemberAdd(member));
     Bot.client.on('interactionCreate', (interaction) => void onInteraction(interaction));
-    Bot.client.once('ready', () => void onReady());
+    Bot.client.once('clientReady', () => void onReady());
 
     await deployCommands();
     await Bot.client.login(process.env.BOT_TOKEN); // Login errors not caught, we want to crash if we can't log in
