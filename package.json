@@ -6,6 +6,7 @@
     "scripts": {
         "build": "rimraf ./build && tsc && node -e \"require('fs').cpSync('src/progress-report/assets','build/progress-report/assets',{recursive:true})\"",
         "start": "npm run build && node -r dotenv/config --trace-warnings build/Bot.js",
+        "migrate": "node -r dotenv/config build/migrate.js",
         "dev": "tsx watch -r dotenv/config ./src/Bot.ts",
         "lint": "eslint .",
         "format": "prettier --write .",
@@ -20,6 +21,7 @@
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@types/node": "^24.0.0",
+        "@types/pg": "^8.20.0",
         "c8": "^11.0.0",
         "eslint": "^10.4.1",
         "eslint-config-prettier": "^10.1.8",
