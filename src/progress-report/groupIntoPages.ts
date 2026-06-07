@@ -16,6 +16,16 @@ export type PlayerPage = PlayerRow[];
 const MIN_PER_PAGE = 10;
 const MAX_PER_PAGE = 25;
 
+// Players ranked beyond every rank-group hold no region rank role, so they get this neutral
+// name colour rather than borrowing the last tier's role colour.
+export const DEFAULT_TIER_COLOR = '#ffffff';
+
+/** First tier whose threshold covers `rank` (selectRankGroup semantics), else the neutral default. */
+function colorForRank(rank: number, tiers: RankTier[]): string {
+    for (const tier of tiers) if (tier.rank >= rank) return tier.color;
+    return DEFAULT_TIER_COLOR;
+}
+
 /**
  * Group players (pre-sorted ascending by countryRank) into pages, starting a new page when
  * the player's countryRank crosses the current tier boundary (if the page already has at
@@ -33,7 +43,9 @@ export default function groupIntoPages(players: PlayerListing[], tiers: RankTier
 
     for (const player of players) {
         const tier = tiers[tierIndex];
-        current.push({player, color: tier.color});
+        // Colour by the tier that actually covers this rank (independent of the page-split
+        // cursor below, which assumes dense ranks); out-of-bracket players get the default.
+        current.push({player, color: colorForRank(player.stats.countryRank, tiers)});
 
         let pageReady = false;
         if (player.stats.countryRank >= tier.rank && tierIndex < tiers.length - 1) {

@@ -26,10 +26,12 @@ export default async function fetchAvatar(url: string, opts: FetchAvatarOptions 
     } catch {
         return null;
     }
-    if (parsed.protocol !== 'https:' || parsed.host !== ALLOWED_HOST) return null;
+    if (parsed.protocol !== 'https:' || parsed.hostname !== ALLOWED_HOST) return null;
 
     try {
-        const res = await fetchImpl(url, {signal: AbortSignal.timeout(timeoutMs)});
+        // redirect: 'manual' so a 30x off the allowlisted host is never followed — the host
+        // check above only covers the initial URL. A redirect surfaces as !res.ok → null.
+        const res = await fetchImpl(url, {signal: AbortSignal.timeout(timeoutMs), redirect: 'manual'});
         if (!res.ok) return null;
 
         const declared = Number(res.headers.get('content-length'));

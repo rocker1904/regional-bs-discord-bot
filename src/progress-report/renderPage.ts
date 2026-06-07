@@ -30,7 +30,7 @@ function truncateToWidth(ctx: SKRSContext2D, text: string, maxWidth: number): st
  * happens here via loadImage(Buffer) — no network I/O.
  */
 export default async function renderPage(page: PlayerPage, avatars: (Buffer | null)[]): Promise<Buffer> {
-    const rowHeight = (SIZE - PADDING * 2) / page.length;
+    const rowHeight = (SIZE - PADDING * 2) / Math.max(page.length, 1);
     const fontSize = Math.max(20, Math.min(40, rowHeight / 2));
 
     const canvas = createCanvas(SIZE, SIZE);
@@ -43,7 +43,7 @@ export default async function renderPage(page: PlayerPage, avatars: (Buffer | nu
         const y = PADDING + rowHeight * i;
         const textY = y + rowHeight / 2;
 
-        if (player.stats.countryRank % 2 === 0) {
+        if (i % 2 === 1) {
             ctx.fillStyle = '#00000022';
             ctx.fillRect(PADDING, y, SIZE - PADDING * 2, rowHeight);
         }
