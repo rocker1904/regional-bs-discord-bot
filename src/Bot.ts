@@ -8,9 +8,11 @@ import onInteraction from './listeners/onInteraction';
 import RoleUpdater from './RoleUpdater';
 import onGuildMemberAdd from './listeners/onGuildMemberAdd';
 import ScoreFeed from './score-feed/ScoreFeed';
+import ProgressReport from './progress-report/ProgressReport';
 import {GuildUser} from './entity/GuildUser';
 import {GainsCommandData} from './entity/GainsCommandData';
 import {CounterData} from './entity/CounterData';
+import {ProgressReportState} from './entity/ProgressReportState';
 
 export default class Bot {
     public static client: Client;
@@ -18,10 +20,12 @@ export default class Bot {
     public static logChannels: {[key: string]: TextChannel} = {}; // Guild ID -> log Channel
     public static rankupFeedChannels: {[key: string]: TextChannel} = {}; // Guild ID -> rankup feed Channel
     public static scoreFeedChannels: {[key: string]: TextChannel} = {}; // Guild ID -> score feed Channel
+    public static progressReportChannels: {[key: string]: TextChannel} = {}; // Guild ID -> progress report channel
     public static staffIDs: {[key: string]: string} = {}; // Guild ID -> staff ID
     public static dataSource: DataSource;
     public static roleUpdater: RoleUpdater;
     public static scoreFeed: ScoreFeed;
+    public static progressReport: ProgressReport;
 }
 
 async function main() {
@@ -33,7 +37,7 @@ async function main() {
         username: process.env.DB_USERNAME,
         password: process.env.DB_PASSWORD,
         database: process.env.DB_DATABASE,
-        entities: [GuildUser, GainsCommandData, CounterData],
+        entities: [GuildUser, GainsCommandData, CounterData, ProgressReportState],
         synchronize: false,
     });
     try {

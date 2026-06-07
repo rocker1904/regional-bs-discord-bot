@@ -11,6 +11,10 @@
                 "positionRequirement": 10,
                 "allowUnrankedScores": false
             },
+            "progressReportConfig": {
+                "channelID": "REPLACE_PROGRESS_REPORT_CHANNEL_ID",
+                "maxRegionRank": 100
+            },
             "regionRankGroups": [{"roleID": "REPLACE_ROLE_ID", "rank": 1}],
             "globalRankGroups": [{"roleID": "REPLACE_ROLE_ID", "rank": 50}],
             "scoreSaberRegions": ["gb"],
