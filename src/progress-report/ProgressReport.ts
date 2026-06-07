@@ -88,7 +88,8 @@ export default class ProgressReport {
      * run must never opt a guild into the monthly schedule (reports stay opt-in via `enable`).
      */
     private async recordRun(guildID: string): Promise<void> {
-        const row = (await ProgressReportState.findOneBy({guildID})) ?? ProgressReportState.create({guildID, enabled: false, lastRunAt: null});
+        const row =
+            (await ProgressReportState.findOneBy({guildID})) ?? ProgressReportState.create({guildID, enabled: false, lastRunAt: null});
         row.lastRunAt = new Date();
         await row.save();
     }

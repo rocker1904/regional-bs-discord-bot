@@ -43,12 +43,17 @@ async function main(): Promise<void> {
             const sql = readFileSync(join(MIGRATIONS_DIR, name), 'utf8');
             console.log(`Applying migration ${name}...`);
             try {
+                // The whole file runs as one transaction (simple query protocol, so multiple
+                // statements are fine — but no CREATE INDEX CONCURRENTLY and no $N placeholders;
+                // see migrations/README.md).
                 await client.query('BEGIN');
                 await client.query(sql);
                 await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [name]);
                 await client.query('COMMIT');
             } catch (err) {
-                await client.query('ROLLBACK');
+                // Don't let a failing ROLLBACK (e.g. the connection itself dropped) mask the
+                // original error — we always want to surface why the migration failed.
+                await client.query('ROLLBACK').catch(() => {});
                 throw new Error(`Migration ${name} failed`, {cause: err});
             }
         }

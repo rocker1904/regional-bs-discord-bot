@@ -41,7 +41,9 @@ export default class ProgressReportCommand implements Command {
                 const picked = interaction.options.getChannel('channel');
                 const target = picked ? interaction.guild?.channels.cache.get(picked.id) : Bot.progressReportChannels[guildID];
                 if (!target || target.type !== ChannelType.GuildText) {
-                    await interaction.reply('I can only post the report to a text channel — pick one, or set a progress report channel in the config.');
+                    await interaction.reply(
+                        'I can only post the report to a text channel — pick one, or set a progress report channel in the config.',
+                    );
                     return;
                 }
                 await interaction.reply(`Running the progress report — images will post to <#${target.id}>.`);
@@ -54,7 +56,8 @@ export default class ProgressReportCommand implements Command {
             case 'enable':
             case 'disable': {
                 const enabled = interaction.options.getSubcommand() === 'enable';
-                const row = (await ProgressReportState.findOneBy({guildID})) ?? ProgressReportState.create({guildID, enabled, lastRunAt: null});
+                const row =
+                    (await ProgressReportState.findOneBy({guildID})) ?? ProgressReportState.create({guildID, enabled, lastRunAt: null});
                 row.enabled = enabled;
                 await row.save();
                 await interaction.reply(`Monthly progress report **${enabled ? 'enabled' : 'disabled'}**.`);
