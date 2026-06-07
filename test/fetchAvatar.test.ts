@@ -43,6 +43,23 @@ test('rejects when the streamed body exceeds the cap even if content-length is a
     assert.equal(out, null);
 });
 
+test('asks fetch not to follow redirects (redirect: manual)', async () => {
+    let opts: RequestInit | undefined;
+    const fetchImpl = (async (_url: string, o: RequestInit) => {
+        opts = o;
+        return new Response(new Uint8Array([1, 2, 3]));
+    }) as unknown as typeof fetch;
+    await fetchAvatar(OK_URL, {fetchImpl});
+    assert.equal(opts?.redirect, 'manual');
+});
+
+test('returns null on a redirect response instead of following it off-host', async () => {
+    const fetchImpl = (async () =>
+        new Response('moved', {status: 302, headers: {location: 'https://evil.example.com/x'}})) as unknown as typeof fetch;
+    const out = await fetchAvatar(OK_URL, {fetchImpl});
+    assert.equal(out, null);
+});
+
 test('returns null on fetch error', async () => {
     const fetchImpl = (async () => {
         throw new Error('boom');

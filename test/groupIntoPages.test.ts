@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import groupIntoPages, {type RankTier} from '../src/progress-report/groupIntoPages';
+import groupIntoPages, {type RankTier, DEFAULT_TIER_COLOR} from '../src/progress-report/groupIntoPages';
 import type {PlayerListing} from 'scoresaber.js';
 
 // Minimal player stand-in: only the field groupIntoPages reads.
@@ -44,9 +44,20 @@ test('caps a page at the maximum size', () => {
     );
 });
 
-test('does not index past the last tier (no crash) and colours rows', () => {
-    const players = Array.from({length: 40}, (_, i) => p(i + 1)); // ranks beyond last tier rank 25
+test('colours each in-bracket row by the first tier covering its rank', () => {
+    const rows = groupIntoPages([p(1), p(5), p(20)], tiers).flat();
+    assert.equal(rows[0].color, '#aaa'); // rank 1 → tier rank 1
+    assert.equal(rows[1].color, '#bbb'); // rank 5 → tier rank 10
+    assert.equal(rows[2].color, '#ccc'); // rank 20 → tier rank 25
+});
+
+test('does not index past the last tier (no crash); out-of-bracket rows get the neutral default', () => {
+    const players = Array.from({length: 40}, (_, i) => p(i + 1)); // ranks 1..40, last tier rank 25
     const pages = groupIntoPages(players, tiers);
     assert.ok(pages.length >= 1);
-    for (const pg of pages) for (const row of pg) assert.ok(tiers.some((t) => t.color === row.color));
+    for (const row of pages.flat()) {
+        const rank = row.player.stats.countryRank;
+        if (rank > 25) assert.equal(row.color, DEFAULT_TIER_COLOR);
+        else assert.ok(tiers.some((t) => t.color === row.color));
+    }
 });

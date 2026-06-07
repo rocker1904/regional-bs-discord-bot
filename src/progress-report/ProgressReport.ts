@@ -11,6 +11,7 @@ import {MonthlyScheduler, isDueThisMonth} from './schedule';
 
 export default class ProgressReport {
     private scheduler = new MonthlyScheduler(() => void this.runDue());
+    private inFlight = new Set<string>(); // guild IDs with a run in progress (no duplicate posts)
 
     public start(): void {
         this.scheduler.start();
@@ -39,34 +40,49 @@ export default class ProgressReport {
         const channel = Bot.progressReportChannels[guildID];
         if (!guildConfig?.progressReportConfig || !channel) return;
 
-        const region = guildConfig.scoreSaberRegions.join(',');
-        const players = await collect(
-            scoreSaber.players.list({countries: region, sort: 'rank', sortDirection: 'asc'}),
-            guildConfig.progressReportConfig.maxRegionRank,
-        ).catch((err) => {
-            logger.error('Progress report failed. Error fetching players.', {guildID});
-            logger.error(err);
-            return undefined;
-        });
-        if (!players) return;
-
-        const tiers = await this.resolveTiers(guildID, guildConfig.regionRankGroups);
-        if (!tiers) return;
-
-        const pages = groupIntoPages(players, tiers);
-        for (const page of pages) {
-            const avatars = await Promise.all(page.map((row) => fetchAvatar(row.player.avatar)));
-            const png = await renderPage(page, avatars);
-            await channel.send({files: [{attachment: png, name: 'progress.png'}]});
+        // Guard against overlapping runs (manual spam, or a manual run meeting the daily tick)
+        // posting duplicate image sets; lastRunAt is only recorded after all pages send.
+        if (this.inFlight.has(guildID)) {
+            logger.info('Progress report already running for guild; skipping overlapping run', {guildID});
+            return;
         }
+        this.inFlight.add(guildID);
+        try {
+            const region = guildConfig.scoreSaberRegions.join(',');
+            const players = await collect(
+                scoreSaber.players.list({countries: region, sort: 'rank', sortDirection: 'asc'}),
+                guildConfig.progressReportConfig.maxRegionRank,
+            ).catch((err) => {
+                logger.error('Progress report failed. Error fetching players.', {guildID});
+                logger.error(err);
+                return undefined;
+            });
+            if (!players) return;
 
-        await this.recordRun(guildID);
-        logger.info(`Progress report posted for ${channel.guild.name} (${pages.length} image(s))`, {guildID});
+            const tiers = await this.resolveTiers(guildID, guildConfig.regionRankGroups);
+            if (!tiers) return;
+
+            const pages = groupIntoPages(players, tiers);
+            for (const page of pages) {
+                const avatars = await Promise.all(page.map((row) => fetchAvatar(row.player.avatar)));
+                const png = await renderPage(page, avatars);
+                await channel.send({files: [{attachment: png, name: 'progress.png'}]});
+            }
+
+            await this.recordRun(guildID);
+            logger.info(`Progress report posted for ${channel.guild.name} (${pages.length} image(s))`, {guildID});
+        } finally {
+            this.inFlight.delete(guildID);
+        }
     }
 
-    /** Set lastRunAt without disturbing the enabled flag (load-or-create, then save). */
+    /**
+     * Set lastRunAt without disturbing the enabled flag. A manual run can reach this for a
+     * guild that has no state row yet, so the create fallback is enabled:false — recording a
+     * run must never opt a guild into the monthly schedule (reports stay opt-in via `enable`).
+     */
     private async recordRun(guildID: string): Promise<void> {
-        const row = (await ProgressReportState.findOneBy({guildID})) ?? ProgressReportState.create({guildID, enabled: true, lastRunAt: null});
+        const row = (await ProgressReportState.findOneBy({guildID})) ?? ProgressReportState.create({guildID, enabled: false, lastRunAt: null});
         row.lastRunAt = new Date();
         await row.save();
     }
