@@ -24,9 +24,9 @@ CLIENT_ID=
 
 3. Copy `config.example.json` to a path outside the repo (e.g. `/srv/regional-bs-discord-bot/config.json`), fill in the guild/channel/role IDs for your server(s), and set `CONFIG_PATH` in `.env` to that absolute path. The config is loaded and validated at boot; a missing/invalid file fails fast with a `ConfigError` naming the problem.
 4. Run `npm i` to install dependencies.
-5. Run `npm run start` to build and launch the bot.
+5. Run `npm run build`, then `npm run migrate` to apply the database migrations, then `npm run start` (or just `npm run start`, and run `npm run migrate` whenever new migrations land).
 
-The schema is managed with TypeORM (`synchronize` is off — create/migrate tables yourself; the entities live in `src/entity`).
+TypeORM `synchronize` is off; the schema is managed by the SQL migrations in `migrations/`, applied by `npm run migrate` (see `migrations/README.md`). The deploy script runs this automatically. Entities live in `src/entity`.
 
 ## Development
 

@@ -115,7 +115,9 @@ function parseGuildConfig(v: unknown, path: string): GuildConfig {
         rankupFeedChannelID: optionalString(o.rankupFeedChannelID, `${path}.rankupFeedChannelID`, ''),
         scoreFeedConfig: o.scoreFeedConfig === undefined ? undefined : parseScoreFeedConfig(o.scoreFeedConfig, `${path}.scoreFeedConfig`),
         progressReportConfig:
-            o.progressReportConfig === undefined ? undefined : parseProgressReportConfig(o.progressReportConfig, `${path}.progressReportConfig`),
+            o.progressReportConfig === undefined
+                ? undefined
+                : parseProgressReportConfig(o.progressReportConfig, `${path}.progressReportConfig`),
         regionRankGroups: asArray(o.regionRankGroups, `${path}.regionRankGroups`).map((g, i) =>
             parseRankGroup(g, `${path}.regionRankGroups[${i}]`),
         ),
