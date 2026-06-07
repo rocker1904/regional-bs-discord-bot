@@ -1,3 +1,4 @@
+import {TextChannel} from 'discord.js';
 import {collect} from 'scoresaber.js';
 import scoreSaber from '../util/scoreSaber';
 import Bot from '../Bot';
@@ -27,18 +28,23 @@ export default class ProgressReport {
         const now = new Date();
         for (const guildConfig of guildConfigs) {
             if (!guildConfig.progressReportConfig) continue;
+            const channel = Bot.progressReportChannels[guildConfig.guildID];
+            if (!channel) continue;
             const state = await ProgressReportState.findOneBy({guildID: guildConfig.guildID});
             if (!state?.enabled) continue; // default-disabled
             if (!isDueThisMonth(now, state.lastRunAt)) continue;
-            await this.runGuild(guildConfig.guildID);
+            await this.runGuild(guildConfig.guildID, channel); // scheduled run always posts to the configured channel
         }
     }
 
-    /** Run the report for one guild now (manual or scheduled). Records lastRunAt on success. */
-    public async runGuild(guildID: string): Promise<void> {
+    /**
+     * Run the report for one guild now (manual or scheduled), posting to `channel`. The scheduler
+     * passes the configured channel; the command passes the configured channel or a picked one.
+     * Records lastRunAt on success.
+     */
+    public async runGuild(guildID: string, channel: TextChannel): Promise<void> {
         const guildConfig = guildConfigs.find((g) => g.guildID === guildID);
-        const channel = Bot.progressReportChannels[guildID];
-        if (!guildConfig?.progressReportConfig || !channel) return;
+        if (!guildConfig?.progressReportConfig) return;
 
         // Guard against overlapping runs (manual spam, or a manual run meeting the daily tick)
         // posting duplicate image sets; lastRunAt is only recorded after all pages send.
