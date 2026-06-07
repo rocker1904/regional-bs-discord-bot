@@ -2,7 +2,7 @@ import {ChannelType} from 'discord.js';
 import Bot from '../Bot';
 import RoleUpdater from '../RoleUpdater';
 import logger from '../util/logger';
-import config from '../config.json';
+import config from '../config';
 import ScoreFeed from '../score-feed/ScoreFeed';
 
 export default async function onReady(): Promise<void> {
@@ -46,7 +46,7 @@ export default async function onReady(): Promise<void> {
     }
 
     if (Object.keys(Bot.guilds).length === 0) {
-        logger.error('No guilds were initialised — check the guild/channel IDs in config.json.');
+        logger.error('No guilds were initialised — check the guild/channel IDs in your CONFIG_PATH file.');
     }
 
     Bot.roleUpdater = new RoleUpdater();

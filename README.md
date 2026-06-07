@@ -22,7 +22,7 @@ BOT_TOKEN=
 CLIENT_ID=
 ```
 
-3. Update `src/config.json` with relevant values for your server(s).
+3. Copy `config.example.json` to a path outside the repo (e.g. `/srv/regional-bs-discord-bot/config.json`), fill in the guild/channel/role IDs for your server(s), and set `CONFIG_PATH` in `.env` to that absolute path. The config is loaded and validated at boot; a missing/invalid file fails fast with a `ConfigError` naming the problem.
 4. Run `npm i` to install dependencies.
 5. Run `npm run start` to build and launch the bot.
 

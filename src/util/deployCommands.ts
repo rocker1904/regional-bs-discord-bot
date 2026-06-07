@@ -3,7 +3,7 @@ import {Routes} from 'discord-api-types/v9';
 import commands from '../commands';
 import contextMenuCommands from '../commands/contextMenu';
 import logger from './logger';
-import {guildConfigs} from '../config.json';
+import {guildConfigs} from '../config';
 
 export default async function deployCommands(): Promise<void> {
     if (!process.env.BOT_TOKEN || !process.env.CLIENT_ID) {
